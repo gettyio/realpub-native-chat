@@ -1,5 +1,5 @@
 {
-  "name": "@realpub/realpub-native-chat",
+  "name": "@realpub/native-chat",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/gettyio/realpub-native-chat/issues"
   },
-  "homepage": "https://github.com/gettyio/realpub-native-chat#readme"
+  "homepage": "https://github.com/gettyio/realpub-native-chat#readme",
+  "dependencies": {
+    "prop-types": "^15.5.10",
+    "react-router-native": "^4.1.1"
+  }
 }
