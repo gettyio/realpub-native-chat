@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bump": "npm version patch",
-    "postbump": "git add . && git commit -m 'bump'",
     "publish": "npm publish --access public",
-    "prepublish": "npm run bump",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
