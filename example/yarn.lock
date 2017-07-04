@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@realpub/native-chat@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@realpub/native-chat/-/native-chat-1.1.1.tgz#4b1631835437d1f60c54c6a9f67ff5a1eea86d74"
+"@realpub/native-chat@1.1.7":
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/@realpub/native-chat/-/native-chat-1.1.7.tgz#c744e07994d89a3e65183862c32185add1c55512"
   dependencies:
     prop-types "^15.5.10"
     react-router-native "^4.1.1"

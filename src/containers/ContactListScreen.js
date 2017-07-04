@@ -6,7 +6,8 @@ class ContactListScreen extends Component {
     return (
       <View
         style={{
-          flex: 1,
+          width: 200,
+          height: 200,
           backgroundColor: "red"
         }}
       />

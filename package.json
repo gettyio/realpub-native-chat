@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "bump": "npm version patch",
-    "prepublish": "npm run bump",
+    "postbump": "npm run publish",
     "publish": "npm publish --access public",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
