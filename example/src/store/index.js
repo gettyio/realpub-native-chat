@@ -6,7 +6,7 @@ const UserSchema = {
   name: "User",
   primaryKey: "id",
   properties: {
-    id: "int",
+    id: "string",
     username: "string",
     firstName: "string",
     lastName: "string",
@@ -32,7 +32,7 @@ const ContactSchema = {
   name: "Contact",
   primaryKey: "id",
   properties: {
-    id: "int",
+    id: "string",
     username: "string",
     firstName: "string",
     lastName: "string",
@@ -50,8 +50,8 @@ const MessageSchema = {
   primaryKey: "id",
   properties: {
     id: "string",
-    from: "int",
-    to: "int",
+    from: "string",
+    to: "string",
     msg: "string",
     status: { type: "string", default: "SENT" },
     timestamp: "date"
