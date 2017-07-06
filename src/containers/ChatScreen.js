@@ -6,34 +6,68 @@ import {
   TouchableOpacity,
   Text,
   FlatList,
-  Image
+  Image,
+  KeyboardAvoidingView
 } from "react-native";
+import uuid from "uuid/v4";
 import { Container, Content, Input, Item, Icon } from "native-base";
+import InvertibleScrollView from "react-native-invertible-scroll-view";
 import TextMessage from "./../components/chat/TextMessage";
 import MessageBlock from "./../components/chat/MessageBlock";
 import Thumbnail from "./../components/chat/Thumbnail";
 import Header from "./../components/Header";
+import Realpub from "./../services/realpub";
+import store from "./../store";
 
 class ChatScreen extends PureComponent {
-  // static propTypes = {
-  //   state: PropTypes.object.isRequired
-  // };
-
   constructor(props) {
     super(props);
+
     this.state = {
-      messages: [
-        {
-          key: 1,
-          from: "user",
-          username: "Dio",
-          fullName: "Dio Ianakiara",
-          message: "hello"
-        }
-      ]
+      text: "",
+      messagesRead: []
     };
+
     this.getInitials = this.getInitials.bind(this);
+    this.handleInput = this.handleInput.bind(this);
+    this.saveAndSendMessage = this.saveAndSendMessage.bind(this);
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
+  }
+
+  componentWillMount() {
+    store.addListener("change", () => {
+      this.forceUpdate();
+    });
+  }
+
+  componentWillUnmount() {
+    // Unregister all listeners
+    store.removeAllListeners();
+  }
+
+  handleInput(text) {
+    this.setState({ text: text });
+  }
+
+  // save the message on db and send to
+  // correspondent user
+  saveAndSendMessage() {
+    if (this.state.text) {
+      const { user, contact, apikey } = this.props.location.state;
+      const textmessage = this.state.text;
+      const msg = {
+        id: uuid(),
+        from: user.id,
+        to: contact.id,
+        msg: textmessage,
+        timestamp: new Date()
+      };
+      store.write(() => {
+        store.create("Message", msg);
+      });
+      this.handleInput("");
+      Realpub.emit(`chat::send::message::to::${contact.id}`, msg);
+    }
   }
 
   getInitials(string) {
@@ -46,21 +80,59 @@ class ChatScreen extends PureComponent {
     return initials;
   }
 
-  renderMessageBlock({ item }) {
-    const initials = this.getInitials(item.fullName);
+  sendReadEvent(msg) {
+    const { contact } = this.props.location.state;
+    const { messagesRead } = this.state;
+    const isAlreadySent =
+      messagesRead.length && messagesRead.find(m => m.id === msg.id);
+    if (
+      contact.id === msg.from &&
+      (msg.status === "SENT" || msg.status === "RECEIVED") &&
+      !isAlreadySent
+    ) {
+      console.log(`chat::send::message::to::${contact.id}`, {
+        ...msg,
+        status: "READ",
+        timestamp: new Date(msg.timestamp)
+      });
+
+      Realpub.emit(`chat::send::message::to::${contact.id}`, {
+        ...msg,
+        status: "READ",
+        timestamp: new Date(msg.timestamp)
+      });
+
+      this.setState({ messagesRead: [...messagesRead, msg] });
+    }
+  }
+
+  renderMessageBlock({ item, index }) {
+    const { user, contact, apikey } = this.props.location.state;
+    const from = user.id === item.from ? "user" : "contact";
+
+    this.sendReadEvent(item);
+
     return (
-      <MessageBlock withStatus>
-        <TextMessage message={item.message} from={item.from} last />
-        <Thumbnail from={item.from} initials={initials} />
+      <MessageBlock withStatus key={index} status={item.status}>
+        <TextMessage message={item.msg} from={from} last />
+        <Thumbnail from={from} initials={"DI"} />
       </MessageBlock>
     );
   }
 
   render() {
+    const { user, contact } = this.props.location.state;
+    const messages = store
+      .objects("Message")
+      .filtered(
+        `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
+      );
+
+    const messageList = messages.map(x => Object.assign({}, x));
+
     return (
       <Container>
         <Header enableLeftBtn={true} />
-
         <Image
           source={require("./../assets/img/gplaypattern.png")}
           style={{
@@ -72,41 +144,30 @@ class ChatScreen extends PureComponent {
         >
           <Content padder style={styles.content}>
             <FlatList
-              data={this.state.messages}
+              inverted={true}
+              data={messageList.reverse()}
               renderItem={this.renderMessageBlock}
+              keyExtractor={(item, index) => `${item}-${index}`}
+              style={{
+                paddingBottom: 32,
+                paddingLeft: 8,
+                paddingRight: 8
+              }}
             />
-            {/*<MessageBlock>
-            <TextMessage message="Hello there!" from="contact" />
-            <TextMessage message="How are you?" from="contact" last />
-            <Thumbnail from="contact" initials="MP" />
-          </MessageBlock>
-          <MessageBlock withStatus>
-            <TextMessage message="I'm fine" from="user" />
-            <TextMessage message="Thank you" from="user" last />
-            <Thumbnail from="user" initials="JR" />
-          </MessageBlock>
-          <MessageBlock>
-            <TextMessage
-              message="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation
-              ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
-              in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-              sunt in culpa qui officia deserunt mollit anim id est laborum."
-              from="contact"
-              last
-            />
-            <Thumbnail from="contact" initials="MP" />
-          </MessageBlock>*/}
           </Content>
         </Image>
-
         <View>
           <Item
             style={{ borderBottomWidth: 0, paddingLeft: 8, paddingRight: 0 }}
           >
-            <Input placeholder="Type something..." />
+            <Input
+              placeholder="Type something..."
+              autoCorrect={false}
+              value={this.state.text}
+              onChangeText={this.handleInput}
+            />
             <TouchableOpacity
-              onPress={() => {}}
+              onPress={this.saveAndSendMessage}
               style={{
                 backgroundColor: "transparent",
                 padding: 16
@@ -132,7 +193,8 @@ class ChatScreen extends PureComponent {
 
 const styles = {
   content: {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    transform: [{ scaleY: -1 }]
   },
   inputTypes: {
     flexDirection: "row",

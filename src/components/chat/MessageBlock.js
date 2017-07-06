@@ -1,23 +1,22 @@
-import React from 'react';
-import { View } from 'react-native';
-import PropTypes from 'prop-types';
+import React from "react";
+import { View } from "react-native";
+import PropTypes from "prop-types";
 
-import DeliveryStatus from './DeliveryStatus';
+import DeliveryStatus from "./DeliveryStatus";
 
-const renderStatus = (withStatus) => {
-  return withStatus && <DeliveryStatus />;
+const renderStatus = (withStatus, status) => {
+  return withStatus && <DeliveryStatus status={status} />;
 };
 
-const MessageBlock = ({ children, withStatus }) => (
+const MessageBlock = ({ children, withStatus, status }) =>
   <View style={styles}>
     {children}
-    {renderStatus(withStatus)}
-  </View>
-);
+    {renderStatus(withStatus, status)}
+  </View>;
 
 MessageBlock.propTypes = {
   children: PropTypes.node.isRequired,
-  withStatus: PropTypes.bool,
+  withStatus: PropTypes.bool
 };
 
 MessageBlock.defaultProps = {
@@ -25,10 +24,11 @@ MessageBlock.defaultProps = {
 };
 
 const styles = {
-  position: 'relative',
+  position: "relative",
   marginVertical: 5,
-  paddingHorizontal: 25,
-  marginBottom: 12
+  paddingHorizontal: 0,
+  marginBottom: 12,
+  transform: [{ scaleY: -1 }]
 };
 
 export default MessageBlock;

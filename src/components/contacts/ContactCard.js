@@ -24,7 +24,7 @@ const Avatar = ({ img }) =>
     />
   </View>;
 
-const ContactInfo = ({ key, username, userStatus }) =>
+const ContactInfo = ({ id, username, status }) =>
   <View style={styles.labelColumn}>
     <View style={styles.labelTitle}>
       <Text style={{ fontSize: 14 }}>
@@ -33,7 +33,7 @@ const ContactInfo = ({ key, username, userStatus }) =>
     </View>
     <View style={{}}>
       <Text style={styles.labelStatus}>
-        {userStatus}
+        {status}
       </Text>
     </View>
   </View>;
@@ -71,20 +71,22 @@ const ContactBadge = () =>
     </View>
   </View>;
 
-const ContactCard = props =>
-  <Link
-    to={{
-      pathname: "/chat",
-      state: { user: props }
-    }}
-    style={styles.row}
-    component={TouchableOpacity}
-    {...props}
-  >
-    <Avatar img={props.avatar} />
-    <ContactInfo {...props} />
-    <ContactBadge />
-  </Link>;
+const ContactCard = ({ user, contact, apikey }) => {
+  return (
+    <Link
+      to={{
+        pathname: "/chat",
+        state: { user, contact, apikey }
+      }}
+      style={styles.row}
+      component={TouchableOpacity}
+    >
+      <Avatar img={contact.avatar} />
+      <ContactInfo {...contact} />
+      <ContactBadge />
+    </Link>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

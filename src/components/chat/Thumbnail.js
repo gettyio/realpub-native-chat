@@ -3,12 +3,19 @@ import { View } from "react-native";
 import { Text } from "native-base";
 import PropTypes from "prop-types";
 
-const Thumbnail = ({ initials, from }) =>
-  <View style={[styles.thumbnail, styles[`${from}Thumbnail`]]}>
-    <Text style={styles.initials}>
-      {initials}
-    </Text>
-  </View>;
+const Thumbnail = ({ initials, from }) => {
+  if (from === "user") {
+    return null;
+  } else {
+    return (
+      <View style={[styles.thumbnail, styles[`${from}Thumbnail`]]}>
+        <Text style={styles.initials}>
+          {initials}
+        </Text>
+      </View>
+    );
+  }
+};
 
 Thumbnail.propTypes = {
   initials: PropTypes.string.isRequired,
