@@ -26,6 +26,12 @@ const RealpubNativeChat = props => {
             true
           );
         });
+
+        socket.emit(`chat::send::message::to::${data.from}`, {
+          ...data,
+          status: "RECEIVED",
+          timestamp: new Date(data.timestamp)
+        });
       });
     })
     .catch(err => console.error(err));
