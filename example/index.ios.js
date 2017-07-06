@@ -14,14 +14,14 @@ export default class ReactNativeChatDemo extends Component {
   render() {
     const contactList = [
       {
-      id: 1,
-      firstName: "Dio Ianakiara",
-      lastName: "Ianakiara",
-      username: "Dio",
-      status: "Life is Good!",
-      avatar:
-        "https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg"
-    },
+        id: 6,
+        firstName: "Lara",
+        lastName: "Ianakiara",
+        username: "lara",
+        status: "Peppa!",
+        avatar:
+          "https://s3.amazonaws.com/uifaces/faces/twitter/adellecharles/128.jpg"
+      },
       {
         id: 2,
         firstName: "Marlon",
@@ -38,19 +38,19 @@ export default class ReactNativeChatDemo extends Component {
         username: "Phillip",
         status: "ONLINE",
         avatar: "https://s3.amazonaws.com/uifaces/faces/twitter/brynn/128.jpg"
-      },
-      
+      }
     ];
 
     const user = {
-        id: 1000000,
-        firstName: "Lara",
-        lastName: "Ianakiara",
-        username: "lara",
-        status: "Peppa!",
-        avatar:
-          "https://s3.amazonaws.com/uifaces/faces/twitter/adellecharles/128.jpg"
-      };
+      id: 1,
+      firstName: "Dio Ianakiara",
+      lastName: "Ianakiara",
+      username: "Dio",
+      status: "Life is Good!",
+      avatar:
+        "https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg"
+    };
+
     return (
       <View style={styles.container}>
         <RealpubNativeChat

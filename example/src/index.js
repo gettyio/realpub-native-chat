@@ -11,27 +11,47 @@ import store from "./store";
 import moment from "moment";
 import Realpub from "./services/realpub";
 
+//clean contacts on up
+store.write(() => {
+  store.deleteAll();
+});
+
 const RealpubNativeChat = props => {
+  const { contacts, user, apikey } = props;
+
   Realpub.init(props.apikey)
     .then(socket => {
-      socket.on(`chat::send::message::to::${props.user.id}`, data => {
-
-        if (data.status === 'SENT') {
-          data.status = 'RECEIVED';
-          socket.emit(`chat::send::message::to::${data.from}`, { 
+      socket.on(`chat::send::message::to::${user.id}`, data => {
+        if (data.status === "SENT") {
+          data.status = "RECEIVED";
+          socket.emit(`chat::send::message::to::${data.from}`, {
             ...data,
             timestamp: new Date(data.timestamp)
           });
         }
 
         store.write(() => {
-          store.create("Message", { 
-            ...data,
-            timestamp: new Date(data.timestamp)
-          }, 
-          true );
+          store.create(
+            "Message",
+            {
+              ...data,
+              timestamp: new Date(data.timestamp)
+            },
+            true
+          );
         });
+      });
 
+      contacts.map(item => {
+        Realpub.send(`send('chat::get::conversation'`, {
+          apikey,
+          to: user.id,
+          from: item.id
+        });
+      });
+
+      Realpub.on(`chat::${user.id}::got::conversation`, data => {
+        console.log(data);
       });
     })
     .catch(err => console.error(err));
