@@ -15,22 +15,15 @@ const RealpubNativeChat = props => {
   Realpub.init(props.apikey)
     .then(socket => {
       socket.on(`chat::send::message::to::${props.user.id}`, data => {
-        store.write(() => {
-          store.create(
-            "Message",
-            {
-              ...data,
-              status: "RECEIVED",
-              timestamp: new Date(data.timestamp)
-            },
-            true
-          );
-        });
 
-        socket.emit(`chat::send::message::to::${data.from}`, {
-          ...data,
-          status: "RECEIVED",
-          timestamp: new Date(data.timestamp)
+        if (data.status === 'SENT') {
+          data.status = 'RECEIVED';
+          socket.emit(`chat::send::message::to::${data.from}`, data);
+        }
+
+        store.write(() => {
+          console.log('Message: ', data.status, data);
+          store.create("Message", data, true );
         });
       });
     })
