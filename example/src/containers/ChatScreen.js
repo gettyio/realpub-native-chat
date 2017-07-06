@@ -26,7 +26,7 @@ class ChatScreen extends PureComponent {
     this.state = {
       text: "",
       update: 1,
-      messageList: []
+      messagesRead: []
     };
 
     this.getInitials = this.getInitials.bind(this);
@@ -37,36 +37,9 @@ class ChatScreen extends PureComponent {
 
   componentDidMount() {
     store.addListener("change", () => {
-      const { user, contact } = this.props.location.state;
-      if (user && contact) {
-        const messages = store
-        .objects("Message")
-        .filtered(
-          `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
-        );
-
-        const messageList = messages.map(x => Object.assign({}, x));
-        messageList.forEach(this.sendReadEvent);
-        this.setState({ messageList });
-      }
-      // this.setState({ update: this.state.update + 1 });
+      this.setState({ update: this.state.update + 1 });
     });
 
-  }
-
-  componentWillMount() {
-      const { user, contact } = this.props.location.state;
-      if (user && contact) {
-        const messages = store
-        .objects("Message")
-        .filtered(
-          `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
-        );
-
-        const messageList = messages.map(x => Object.assign({}, x));
-        console.log('messageList', messageList);
-        this.setState({ messageList });
-      }
   }
 
   componentWillUnmount() {
@@ -115,7 +88,9 @@ class ChatScreen extends PureComponent {
   sendReadEvent(msg) {
     
     const { contact } = this.props.location.state;
-    if (contact.id === msg.from && (msg.status === 'SENT' || msg.status === 'RECEIVED')) {
+    const { messagesRead } = this.state;
+    const isAlreadySent = messagesRead.length && messagesRead.find(m => m.id === msg.id)
+    if (contact.id === msg.from && (msg.status === 'SENT' || msg.status === 'RECEIVED') && !isAlreadySent) {
       console.log(`chat::send::message::to::${contact.id}`, {
         ...msg,
         status: "READ",
@@ -127,12 +102,16 @@ class ChatScreen extends PureComponent {
         status: "READ",
         timestamp: new Date(msg.timestamp)
       });
+
+      this.setState({ messagesRead: [...messagesRead, msg]});
     }
   }
 
   renderMessageBlock({ item, index }) {
     const { user, contact, apikey } = this.props.location.state;
     const from = user.id === item.from ? "user" : "contact";
+    
+    this.sendReadEvent(item);
 
     return (
       <MessageBlock withStatus key={index} status={item.status}>
@@ -143,7 +122,14 @@ class ChatScreen extends PureComponent {
   }
 
   render() {
-    const { messageList } = this.state;
+    const { user, contact } = this.props.location.state;
+    const messages = store
+      .objects("Message")
+      .filtered(
+        `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
+      );
+
+    const messageList = messages.map(x => Object.assign({}, x));
 
     return (
       <Container>
