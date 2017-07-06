@@ -5,95 +5,50 @@ import {
   Text,
   Image,
   FlatList,
+  StatusBar,
   TouchableOpacity
 } from "react-native";
+import PropTypes from "prop-types";
+import { Spinner } from "native-base";
 import { Link } from "react-router-native";
 
-import ChatScreen from "./ChatScreen";
 import Header from "./../components/Header";
+import ChatScreen from "./ChatScreen";
+import ContactCard from "./../components/contacts/ContactCard";
 
-const Avatar = ({ img }) =>
-  <View style={styles.photoColumn}>
-    <Image
-      source={{
-        uri: img
-      }}
-      style={{
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        backgroundColor: "white"
-      }}
-    />
-  </View>;
-
-const ContactInfo = ({ key, username, userStatus }) =>
-  <View style={styles.labelColumn}>
-    <View style={styles.labelTitle}>
-      <Text style={{ fontSize: 14 }}>
-        {username}
-      </Text>
-    </View>
-    <View style={{}}>
-      <Text style={styles.labelStatus}>
-        {userStatus}
-      </Text>
-    </View>
-  </View>;
-
-const ContactBadge = () =>
-  <View
-    style={{
-      width: 60,
-      alignItems: "flex-start",
-      justifyContent: "center",
-      paddingLeft: 8
-    }}
-  >
-    <View
-      style={{
-        width: 20,
-        height: 16,
-        backgroundColor: "red",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: 8
-      }}
-    >
-      <Text
-        style={{
-          color: "white",
-          fontSize: 10,
-          justifyContent: "center",
-          alignItems: "center",
-          fontWeight: "600"
-        }}
-      >
-        0
-      </Text>
-    </View>
-  </View>;
-
-const ContactCard = props =>
-  <Link
-    to={{
-      pathname: "/chat",
-      state: { user: props }
-    }}
-    style={styles.row}
-    component={TouchableOpacity}
-    {...props}
-  >
-    <Avatar img={props.avatar} />
-    <ContactInfo {...props} />
-    <ContactBadge />
-  </Link>;
+import store from "./../store";
 
 class ContactListScreen extends PureComponent {
   constructor(props) {
     super(props);
+
+    this.state = {
+      isLoading: true,
+      isChatReady: false,
+      contacts: [],
+      currentUser: null
+    };
+
     this.renderRow = this.renderRow.bind(this);
+    this.handleRenderer = this.handleRenderer.bind(this);
+    this.renderContactList = this.renderContactList.bind(this);
+    this.renderLoading = this.renderLoading.bind(this);
     this.showChatHistory = this.showChatHistory.bind(this);
+
+    const user = props.user;
+    store.write(() => {
+      let currentUser = store.create("User", user, true);
+      currentUser.setStatus("ONLINE");
+    });
+
+    const contacts = props.contacts;
+    store.write(() => {
+      contacts.map(item => store.create("Contact", item, true));
+    });
+  }
+
+  componentDidMount() {
+    this.setState({ isLoading: false });
   }
 
   showChatHistory() {
@@ -101,20 +56,49 @@ class ContactListScreen extends PureComponent {
   }
 
   renderRow(row) {
+    const { user, apikey } = this.props;
     return (
       <ContactCard
-        {...row.item}
         key={row.index}
+        apikey={apikey}
+        user={user}
+        contact={row.item}
         onPress={this.showChatHistory}
       />
     );
   }
 
+  renderLoading() {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <Spinner color="blue" />
+      </View>
+    );
+  }
+
+  renderContactList() {
+    const contacts = store.objects("Contact");
+    return (
+      <FlatList
+        data={contacts}
+        renderItem={this.renderRow}
+        keyExtractor={(item, index) => item.id}
+      />
+    );
+  }
+
+  handleRenderer() {
+    const { isLoading } = this.state;
+    if (isLoading) return this.renderLoading();
+
+    return this.renderContactList();
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        <Header />
-        <FlatList data={this.props.contactList} renderItem={this.renderRow} />
+        <Header enableLeftBtn={false} />
+        {this.handleRenderer()}
       </View>
     );
   }
@@ -122,26 +106,7 @@ class ContactListScreen extends PureComponent {
 const styles = StyleSheet.create({
   container: {
     flex: 1
-  },
-  row: {
-    height: 70,
-    paddingLeft: 16,
-    flexDirection: "row",
-    borderTopWidth: 0.5,
-    borderColor: "#c3c3c3"
-  },
-  photoColumn: {
-    flex: 0.2,
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  labelColumn: {
-    flex: 0.8,
-    padding: 16
-  },
-  labelStatus: {
-    borderColor: "#c3c3c3",
-    fontSize: 10
   }
 });
+
 export default ContactListScreen;

@@ -8,9 +8,19 @@
   },
   "dependencies": {
     "@realpub/native-chat": "1.1.7",
+    "lodash": "^4.17.4",
+    "moment": "^2.18.1",
+    "native-base": "^2.2.0",
     "react": "16.0.0-alpha.12",
     "react-native": "0.45.1",
-    "react-native-vector-icons": "^4.2.0"
+    "react-native-vector-icons": "^4.2.0",
+    "react-redux": "^5.0.5",
+    "realm": "^1.8.3",
+    "redux": "^3.7.1",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0",
+    "socket.io-client": "^2.0.3",
+    "uuid": "^3.1.0"
   },
   "devDependencies": {
     "babel-jest": "20.0.3",

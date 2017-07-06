@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/gettyio/realpub-native-chat#readme",
   "dependencies": {
+    "native-base": "^2.2.0",
     "prop-types": "^15.5.10",
     "react-router-native": "^4.1.1"
   }
