@@ -14,7 +14,7 @@ export default class ReactNativeChatDemo extends Component {
   render() {
     const contactList = [
       {
-        id: 6,
+        id: "58e67bc617ae630010c530c1",
         firstName: "Lara",
         lastName: "Ianakiara",
         username: "lara",
@@ -23,7 +23,7 @@ export default class ReactNativeChatDemo extends Component {
           "https://s3.amazonaws.com/uifaces/faces/twitter/adellecharles/128.jpg"
       },
       {
-        id: 2,
+        id: "58e67bc617ae630010c530c1addass",
         firstName: "Marlon",
         lastName: "Gomes",
         username: "Marlon",
@@ -32,7 +32,7 @@ export default class ReactNativeChatDemo extends Component {
           "https://s3.amazonaws.com/uifaces/faces/twitter/kfriedson/128.jpg"
       },
       {
-        id: 3,
+        id: "adsassda58e67bc617ae630010c530c1",
         firstName: "Phillip",
         lastName: "Lopes",
         username: "Phillip",
@@ -42,7 +42,7 @@ export default class ReactNativeChatDemo extends Component {
     ];
 
     const user = {
-      id: 1,
+      id: "lllll58e67bc617ae630010c530c1",
       firstName: "Dio Ianakiara",
       lastName: "Ianakiara",
       username: "Dio",

@@ -125,7 +125,7 @@ class ChatScreen extends PureComponent {
     const messages = store
       .objects("Message")
       .filtered(
-        `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
+        `(from = '${user.id}' AND to = '${contact.id}') OR (from = '${contact.id}' AND to = '${user.id}')`
       );
 
     const messageList = messages.map(x => Object.assign({}, x));
