@@ -41,7 +41,8 @@ class ChatScreen extends PureComponent {
   }
 
   componentWillUnmount() {
-    const { user, contact } = this.props.location.state;
+    // Unregister all listeners
+    store.removeAllListeners();
   }
 
   handleInput(text) {
