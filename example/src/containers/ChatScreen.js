@@ -24,13 +24,20 @@ class ChatScreen extends PureComponent {
     super(props);
 
     this.state = {
-      text: ""
+      text: "",
+      update: 1
     };
 
     this.getInitials = this.getInitials.bind(this);
     this.handleInput = this.handleInput.bind(this);
     this.saveAndSendMessage = this.saveAndSendMessage.bind(this);
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
+  }
+
+  componentDidMount() {
+    store.addListener("change", () => {
+      this.setState({ update: this.state.update + 1 });
+    });
   }
 
   componentWillUnmount() {
