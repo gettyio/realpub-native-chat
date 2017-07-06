@@ -25,7 +25,8 @@ class ChatScreen extends PureComponent {
 
     this.state = {
       text: "",
-      update: 1
+      update: 1,
+      messageList: []
     };
 
     this.getInitials = this.getInitials.bind(this);
@@ -36,9 +37,36 @@ class ChatScreen extends PureComponent {
 
   componentDidMount() {
     store.addListener("change", () => {
-      this.setState({ update: this.state.update + 1 });
+      const { user, contact } = this.props.location.state;
+      if (user && contact) {
+        const messages = store
+        .objects("Message")
+        .filtered(
+          `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
+        );
+
+        const messageList = messages.map(x => Object.assign({}, x));
+        messageList.forEach(this.sendReadEvent);
+        this.setState({ messageList });
+      }
+      // this.setState({ update: this.state.update + 1 });
     });
 
+  }
+
+  componentWillMount() {
+      const { user, contact } = this.props.location.state;
+      if (user && contact) {
+        const messages = store
+        .objects("Message")
+        .filtered(
+          `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
+        );
+
+        const messageList = messages.map(x => Object.assign({}, x));
+        console.log('messageList', messageList);
+        this.setState({ messageList });
+      }
   }
 
   componentWillUnmount() {
@@ -105,8 +133,6 @@ class ChatScreen extends PureComponent {
   renderMessageBlock({ item, index }) {
     const { user, contact, apikey } = this.props.location.state;
     const from = user.id === item.from ? "user" : "contact";
-    
-    this.sendReadEvent(item);
 
     return (
       <MessageBlock withStatus key={index} status={item.status}>
@@ -117,14 +143,7 @@ class ChatScreen extends PureComponent {
   }
 
   render() {
-    const { user, contact } = this.props.location.state;
-    const messages = store
-      .objects("Message")
-      .filtered(
-        `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
-      );
-
-    const messageList = messages.map(x => Object.assign({}, x));
+    const { messageList } = this.state;
 
     return (
       <Container>
