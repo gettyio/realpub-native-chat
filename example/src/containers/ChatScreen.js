@@ -38,10 +38,12 @@ class ChatScreen extends PureComponent {
     store.addListener("change", () => {
       this.setState({ update: this.state.update + 1 });
     });
+
   }
 
   componentWillUnmount() {
     // Unregister all listeners
+    console.log('component will unmount');
     store.removeAllListeners();
   }
 
@@ -82,9 +84,22 @@ class ChatScreen extends PureComponent {
     return initials;
   }
 
+  sendReadEvent(msg) {
+    const { contact } = this.props.location.state;
+    if (contact.id === msg.from && msg.status.indexOf(['SENT', 'RECEIVED'] != -1)) {
+      Realpub.emit(`chat::send::message::to::${contact.id}`, {
+        ...msg,
+        status: "READ"
+      });
+    }
+  }
+
   renderMessageBlock({ item, index }) {
     const { user, contact, apikey } = this.props.location.state;
     const from = user.id === item.from ? "user" : "contact";
+    
+    this.sendReadEvent(item);
+
     return (
       <MessageBlock withStatus key={index} status={item.status}>
         <TextMessage message={item.msg} from={from} last />
