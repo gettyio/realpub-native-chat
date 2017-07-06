@@ -62,6 +62,6 @@ class Message {}
 Message.schema = MessageSchema;
 
 export default new Realm({
-  schema: [User, Contact, Message],
+  schema: [User, Message],
   schemaVersion: 13
 });

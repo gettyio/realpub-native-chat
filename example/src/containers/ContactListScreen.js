@@ -35,16 +35,16 @@ class ContactListScreen extends PureComponent {
     this.renderLoading = this.renderLoading.bind(this);
     this.showChatHistory = this.showChatHistory.bind(this);
 
-    const user = props.user;
-    store.write(() => {
-      let currentUser = store.create("User", user, true);
-      currentUser.setStatus("ONLINE");
-    });
+    // const user = props.user;
+    // store.write(() => {
+    //   let currentUser = store.create("User", user, true);
+    //   currentUser.setStatus("ONLINE");
+    // });
 
-    const contacts = props.contacts;
-    store.write(() => {
-      contacts.map(item => store.create("Contact", item, true));
-    });
+    // const contacts = props.contacts;
+    // store.write(() => {
+    //   contacts.map(item => store.create("Contact", item, true));
+    // });
   }
 
   componentDidMount() {
@@ -77,7 +77,7 @@ class ContactListScreen extends PureComponent {
   }
 
   renderContactList() {
-    const contacts = store.objects("Contact");
+    const contacts = this.state.contacts;
     return (
       <FlatList
         data={contacts}

@@ -9,32 +9,32 @@ import ChatScreen from "./containers/ChatScreen";
 
 import store from "./store";
 import moment from "moment";
-import Realpub from "./services/realpub";
 
 const RealpubNativeChat = props => {
-  Realpub.init(props.apikey)
-    .then(socket => {
-      socket.on(`chat::send::message::to::${props.user.id}`, data => {
+  const port = 9080;
+  const host = "localhost";
+  const baseURL = `http://${host}:${port}`;
+  const repSrv = `realm://${host}:${9080}/${app}/users`;
+  const app = props.apikey;
+  const currentUser = props.user;
 
-        if (data.status === 'SENT') {
-          data.status = 'RECEIVED';
-          socket.emit(`chat::send::message::to::${data.from}`, { 
-            ...data,
-            timestamp: new Date(data.timestamp)
-          });
-        }
-
-        store.write(() => {
-          store.create("Message", { 
-            ...data,
-            timestamp: new Date(data.timestamp)
-          }, 
-          true );
-        });
-
+  Realm.Sync.User.login(baseURL, "david@getty.io", "12345", (error, user) => {
+    if (!error) {
+      var realm = new Realm({
+        sync: {
+          user: user,
+          url: repSrv
+        },
+        schema: [User, Message],
+        schemaVersion: 14
       });
-    })
-    .catch(err => console.error(err));
+
+      realm.write(() => {
+        store.create("User", currentUser, true);
+      });
+    }
+  });
+
   return (
     <NativeRouter>
       <View style={{ flex: 1, width: "100%", height: "100%" }}>
