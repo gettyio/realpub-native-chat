@@ -16,7 +16,8 @@ store.write(() => {
   store.deleteAll();
 });
 console.ignoredYellowBox = [
-  "Warning: Cannot update during an existing state transition"
+  "Warning: Cannot update during an existing state transition",
+  "Warning: checkPropTypes"
 ];
 
 const RealpubNativeChat = props => {

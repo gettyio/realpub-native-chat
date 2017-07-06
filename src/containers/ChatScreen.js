@@ -156,7 +156,7 @@ class ChatScreen extends PureComponent {
             />
           </Content>
         </Image>
-        <View>
+        <KeyboardAvoidingView behavior="padding">
           <Item
             style={{ borderBottomWidth: 0, paddingLeft: 8, paddingRight: 0 }}
           >
@@ -185,7 +185,7 @@ class ChatScreen extends PureComponent {
             <Icon style={styles.inputType} name="ios-navigate-outline" />
             <Icon style={styles.inputType} name="ios-more" />
           </View>*/}
-        </View>
+        </KeyboardAvoidingView>
       </Container>
     );
   }
