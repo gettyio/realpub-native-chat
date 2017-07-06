@@ -60,7 +60,7 @@ class ChatScreen extends PureComponent {
 
     if (this.state.text) {
       this.handleInput("");
-      Realpub.emit(`chat::send::message::to::${user.id}`, msg);
+      Realpub.emit(`chat::send::message::to::${contact.id}`, msg);
     }
   }
 

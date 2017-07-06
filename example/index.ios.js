@@ -14,15 +14,6 @@ export default class ReactNativeChatDemo extends Component {
   render() {
     const contactList = [
       {
-        id: 1,
-        firstName: "Dio Ianakiara",
-        lastName: "Ianakiara",
-        username: "Dio",
-        status: "Life is Good!",
-        avatar:
-          "https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg"
-      },
-      {
         id: 2,
         firstName: "Marlon",
         lastName: "Gomes",
