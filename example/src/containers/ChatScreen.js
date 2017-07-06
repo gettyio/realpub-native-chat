@@ -86,7 +86,7 @@ class ChatScreen extends PureComponent {
 
   sendReadEvent(msg) {
     const { contact } = this.props.location.state;
-    if (contact.id === msg.from && msg.status.indexOf(['SENT', 'RECEIVED'] != -1)) {
+    if (contact.id === msg.from && (msg.status === 'SENT' || msg.status === 'RECEIVED')) {
       Realpub.emit(`chat::send::message::to::${contact.id}`, {
         ...msg,
         status: "READ"
