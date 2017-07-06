@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import uuid from "uuid/v4";
 import { Container, Content, Input, Item, Icon } from "native-base";
-
+import InvertibleScrollView from "react-native-invertible-scroll-view";
 import TextMessage from "./../components/chat/TextMessage";
 import MessageBlock from "./../components/chat/MessageBlock";
 import Thumbnail from "./../components/chat/Thumbnail";
@@ -24,12 +24,7 @@ class ChatScreen extends PureComponent {
     super(props);
 
     this.state = {
-      text: "",
-      toUserIsOnline: false,
-      unread_messages: [],
-      messageStatus: "UNREAD",
-      conversation: [],
-      loading: true
+      text: ""
     };
 
     this.getInitials = this.getInitials.bind(this);
@@ -83,7 +78,7 @@ class ChatScreen extends PureComponent {
     const { user, contact, apikey } = this.props.location.state;
     const from = user.id === item.from ? "user" : "contact";
     return (
-      <MessageBlock key={index} status={item.status} withStatus>
+      <MessageBlock withStatus key={index} status={item.status}>
         <TextMessage message={item.msg} from={from} last />
         <Thumbnail from={from} initials={"DI"} />
       </MessageBlock>
@@ -97,10 +92,12 @@ class ChatScreen extends PureComponent {
       .filtered(
         `(from = ${user.id} AND to = ${contact.id}) OR (from = ${contact.id} AND to = ${user.id})`
       );
+
+    const messageList = messages.map(x => Object.assign({}, x));
+
     return (
       <Container>
         <Header enableLeftBtn={true} />
-
         <Image
           source={require("./../assets/img/gplaypattern.png")}
           style={{
@@ -112,13 +109,18 @@ class ChatScreen extends PureComponent {
         >
           <Content padder style={styles.content}>
             <FlatList
-              data={messages}
+              inverted={true}
+              data={messageList.reverse()}
               renderItem={this.renderMessageBlock}
-              keyExtractor={(item, index) => index}
+              keyExtractor={(item, index) => `${item}-${index}`}
+              style={{
+                paddingBottom: 32,
+                paddingLeft: 8,
+                paddingRight: 8
+              }}
             />
           </Content>
         </Image>
-
         <View>
           <Item
             style={{ borderBottomWidth: 0, paddingLeft: 8, paddingRight: 0 }}
@@ -126,6 +128,7 @@ class ChatScreen extends PureComponent {
             <Input
               placeholder="Type something..."
               autoCorrect={false}
+              value={this.state.text}
               onChangeText={this.handleInput}
             />
             <TouchableOpacity
@@ -155,7 +158,8 @@ class ChatScreen extends PureComponent {
 
 const styles = {
   content: {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    transform: [{ scaleY: -1 }]
   },
   inputTypes: {
     flexDirection: "row",

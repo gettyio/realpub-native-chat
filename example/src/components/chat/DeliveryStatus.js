@@ -11,11 +11,9 @@ const DeliveryStatus = ({ status }) =>
   </View>;
 
 const styles = {
-  fontSize: 10,
+  fontSize: 8,
   color: "#777",
   alignSelf: "flex-end",
-  position: "absolute",
-  bottom: -12,
   right: 2
 };
 

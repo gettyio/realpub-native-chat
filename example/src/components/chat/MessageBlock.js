@@ -27,7 +27,8 @@ const styles = {
   position: "relative",
   marginVertical: 5,
   paddingHorizontal: 25,
-  marginBottom: 12
+  marginBottom: 12,
+  transform: [{ scaleY: -1 }]
 };
 
 export default MessageBlock;
