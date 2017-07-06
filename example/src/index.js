@@ -15,6 +15,9 @@ import Realpub from "./services/realpub";
 store.write(() => {
   store.deleteAll();
 });
+console.ignoredYellowBox = [
+  "Warning: Cannot update during an existing state transition"
+];
 
 const RealpubNativeChat = props => {
   const { contacts, user, apikey } = props;

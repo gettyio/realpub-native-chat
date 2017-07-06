@@ -26,7 +26,7 @@ MessageBlock.defaultProps = {
 const styles = {
   position: "relative",
   marginVertical: 5,
-  paddingHorizontal: 25,
+  paddingHorizontal: 0,
   marginBottom: 12,
   transform: [{ scaleY: -1 }]
 };

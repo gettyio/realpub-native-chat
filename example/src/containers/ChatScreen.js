@@ -25,7 +25,6 @@ class ChatScreen extends PureComponent {
 
     this.state = {
       text: "",
-      update: 1,
       messagesRead: []
     };
 
@@ -35,16 +34,14 @@ class ChatScreen extends PureComponent {
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     store.addListener("change", () => {
-      this.setState({ update: this.state.update + 1 });
+      this.forceUpdate();
     });
-
   }
 
   componentWillUnmount() {
     // Unregister all listeners
-    console.log('component will unmount');
     store.removeAllListeners();
   }
 
@@ -55,21 +52,19 @@ class ChatScreen extends PureComponent {
   // save the message on db and send to
   // correspondent user
   saveAndSendMessage() {
-    const { user, contact, apikey } = this.props.location.state;
-    const textmessage = this.state.text;
-    const msg = {
-      id: uuid(),
-      from: user.id,
-      to: contact.id,
-      msg: textmessage,
-      timestamp: new Date()
-    };
-    console.log(msg);
-    store.write(() => {
-      store.create("Message", msg);
-    });
-
     if (this.state.text) {
+      const { user, contact, apikey } = this.props.location.state;
+      const textmessage = this.state.text;
+      const msg = {
+        id: uuid(),
+        from: user.id,
+        to: contact.id,
+        msg: textmessage,
+        timestamp: new Date()
+      };
+      store.write(() => {
+        store.create("Message", msg);
+      });
       this.handleInput("");
       Realpub.emit(`chat::send::message::to::${contact.id}`, msg);
     }
@@ -86,11 +81,15 @@ class ChatScreen extends PureComponent {
   }
 
   sendReadEvent(msg) {
-    
     const { contact } = this.props.location.state;
     const { messagesRead } = this.state;
-    const isAlreadySent = messagesRead.length && messagesRead.find(m => m.id === msg.id)
-    if (contact.id === msg.from && (msg.status === 'SENT' || msg.status === 'RECEIVED') && !isAlreadySent) {
+    const isAlreadySent =
+      messagesRead.length && messagesRead.find(m => m.id === msg.id);
+    if (
+      contact.id === msg.from &&
+      (msg.status === "SENT" || msg.status === "RECEIVED") &&
+      !isAlreadySent
+    ) {
       console.log(`chat::send::message::to::${contact.id}`, {
         ...msg,
         status: "READ",
@@ -103,14 +102,14 @@ class ChatScreen extends PureComponent {
         timestamp: new Date(msg.timestamp)
       });
 
-      this.setState({ messagesRead: [...messagesRead, msg]});
+      this.setState({ messagesRead: [...messagesRead, msg] });
     }
   }
 
   renderMessageBlock({ item, index }) {
     const { user, contact, apikey } = this.props.location.state;
     const from = user.id === item.from ? "user" : "contact";
-    
+
     this.sendReadEvent(item);
 
     return (

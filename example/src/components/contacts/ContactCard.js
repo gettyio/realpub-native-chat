@@ -72,7 +72,6 @@ const ContactBadge = () =>
   </View>;
 
 const ContactCard = ({ user, contact, apikey }) => {
-  console.log(contact);
   return (
     <Link
       to={{
