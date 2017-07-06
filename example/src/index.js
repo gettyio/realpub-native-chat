@@ -18,13 +18,20 @@ const RealpubNativeChat = props => {
 
         if (data.status === 'SENT') {
           data.status = 'RECEIVED';
-          socket.emit(`chat::send::message::to::${data.from}`, data);
+          socket.emit(`chat::send::message::to::${data.from}`, { 
+            ...data,
+            timestamp: new Date(data.timestamp)
+          });
         }
 
         store.write(() => {
-          console.log('Message: ', data.status, data);
-          store.create("Message", data, true );
+          store.create("Message", { 
+            ...data,
+            timestamp: new Date(data.timestamp)
+          }, 
+          true );
         });
+
       });
     })
     .catch(err => console.error(err));
