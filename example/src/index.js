@@ -1,9 +1,6 @@
 import React from "react";
-import { Provider } from "react-redux";
-
 import { StyleSheet, Text, View } from "react-native";
 import { NativeRouter, Route, Link } from "react-router-native";
-
 import ContactListScreen from "./containers/ContactListScreen";
 import ChatScreen from "./containers/ChatScreen";
 
