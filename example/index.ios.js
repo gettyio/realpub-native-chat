@@ -15,37 +15,33 @@ export default class ReactNativeChatDemo extends Component {
     const contactList = [
       {
         id: "58e67bc617ae630010c530c1",
-        firstName: "Lara",
-        lastName: "Ianakiara",
-        username: "lara",
-        status: "Peppa!",
+        fullName: "Lara Ianakiara",
+        displayName: "larinha",
+        status: "Life is Good!",
         avatar:
           "https://s3.amazonaws.com/uifaces/faces/twitter/adellecharles/128.jpg"
       },
       {
         id: "58e67bc617ae630010c530c1addass",
-        firstName: "Marlon",
-        lastName: "Gomes",
-        username: "Marlon",
-        status: "modafocaaaa!",
+        fullName: "Marlon Gomes",
+        displayName: "mister-m",
+        status: "Life is Good!",
         avatar:
           "https://s3.amazonaws.com/uifaces/faces/twitter/kfriedson/128.jpg"
       },
       {
         id: "adsassda58e67bc617ae630010c530c1",
-        firstName: "Phillip",
-        lastName: "Lopes",
-        username: "Phillip",
-        status: "ONLINE",
+        fullName: "Phillip Lopes",
+        displayName: "paflops",
+        status: "Life is Good!",
         avatar: "https://s3.amazonaws.com/uifaces/faces/twitter/brynn/128.jpg"
       }
     ];
 
     const user = {
       id: "lllll58e67bc617ae630010c530c1",
-      firstName: "Dio Ianakiara",
-      lastName: "Ianakiara",
-      username: "Dio",
+      fullName: "Dio Ianakiara",
+      displayName: "dio",
       status: "Life is Good!",
       avatar:
         "https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg"

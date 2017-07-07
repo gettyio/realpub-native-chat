@@ -9,6 +9,8 @@ import {
 } from "react-native";
 import { Link } from "react-router-native";
 
+import store from "./../../store";
+
 const Avatar = ({ img }) =>
   <View style={styles.photoColumn}>
     <Image
@@ -38,38 +40,45 @@ const ContactInfo = ({ id, username, status }) =>
     </View>
   </View>;
 
-const ContactBadge = () =>
-  <View
-    style={{
-      width: 60,
-      alignItems: "flex-start",
-      justifyContent: "center",
-      paddingLeft: 8
-    }}
-  >
+const ContactBadge = props => {
+  const unreadedMessages = store
+    .objects("Message")
+    .filtered(`from = '${props.id}' AND status = 'RECEIVED'`);
+  console.log("unreadedMessages", unreadedMessages);
+  return (
     <View
       style={{
-        width: 20,
-        height: 16,
-        backgroundColor: "red",
-        alignItems: "center",
+        width: 60,
+        alignItems: "flex-start",
         justifyContent: "center",
-        borderRadius: 8
+        paddingLeft: 8
       }}
     >
-      <Text
+      <View
         style={{
-          color: "white",
-          fontSize: 10,
-          justifyContent: "center",
+          width: 20,
+          height: 16,
+          backgroundColor: "red",
           alignItems: "center",
-          fontWeight: "600"
+          justifyContent: "center",
+          borderRadius: 8
         }}
       >
-        0
-      </Text>
+        <Text
+          style={{
+            color: "white",
+            fontSize: 10,
+            justifyContent: "center",
+            alignItems: "center",
+            fontWeight: "600"
+          }}
+        >
+          0
+        </Text>
+      </View>
     </View>
-  </View>;
+  );
+};
 
 const ContactCard = ({ user, contact, apikey }) => {
   const statusColor = contact.status === "ONLINE" ? "#4bec13" : "red";
@@ -99,7 +108,7 @@ const ContactCard = ({ user, contact, apikey }) => {
         />
       </View>
       <ContactInfo {...contact} />
-      <ContactBadge />
+      <ContactBadge {...contact} />
     </Link>
   );
 };

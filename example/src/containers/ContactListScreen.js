@@ -57,6 +57,7 @@ class ContactListScreen extends PureComponent {
 
   renderRow(row) {
     const { user, apikey } = this.props;
+
     return (
       <ContactCard
         key={row.index}

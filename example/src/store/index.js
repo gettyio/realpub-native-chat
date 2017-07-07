@@ -7,9 +7,8 @@ const UserSchema = {
   primaryKey: "id",
   properties: {
     id: "string",
-    username: "string",
-    firstName: "string",
-    lastName: "string",
+    displayName: "string",
+    fullName: "string",
     avatar: { type: "string", optional: true },
     email: { type: "string", optional: true },
     status: { type: "string", default: "OFFLINE", optional: true }
@@ -33,9 +32,8 @@ const ContactSchema = {
   primaryKey: "id",
   properties: {
     id: "string",
-    username: "string",
-    firstName: "string",
-    lastName: "string",
+    displayName: "string",
+    fullName: "string",
     avatar: { type: "string", optional: true },
     email: { type: "string", optional: true },
     status: { type: "string", default: "OFFLINE", optional: true }
@@ -63,5 +61,5 @@ Message.schema = MessageSchema;
 
 export default new Realm({
   schema: [User, Contact, Message],
-  schemaVersion: 15
+  schemaVersion: 16
 });
