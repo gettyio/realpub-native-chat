@@ -72,6 +72,7 @@ const ContactBadge = () =>
   </View>;
 
 const ContactCard = ({ user, contact, apikey }) => {
+  const statusColor = contact.status === "ONLINE" ? "#4bec13" : "red";
   return (
     <Link
       to={{
@@ -81,7 +82,22 @@ const ContactCard = ({ user, contact, apikey }) => {
       style={styles.row}
       component={TouchableOpacity}
     >
-      <Avatar img={contact.avatar} />
+      <View>
+        <Avatar img={contact.avatar} />
+        <View
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: 7,
+            backgroundColor: statusColor,
+            borderWidth: 1,
+            borderColor: "rgba(255, 255, 255, 1)",
+            position: "absolute",
+            top: 8,
+            right: 0
+          }}
+        />
+      </View>
       <ContactInfo {...contact} />
       <ContactBadge />
     </Link>
