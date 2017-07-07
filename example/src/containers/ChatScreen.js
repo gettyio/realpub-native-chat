@@ -16,7 +16,6 @@ import TextMessage from "./../components/chat/TextMessage";
 import MessageBlock from "./../components/chat/MessageBlock";
 import Thumbnail from "./../components/chat/Thumbnail";
 import Header from "./../components/Header";
-import Realpub from "./../services/realpub";
 import store from "./../store";
 
 class ChatScreen extends PureComponent {
@@ -66,7 +65,6 @@ class ChatScreen extends PureComponent {
         store.create("Message", msg);
       });
       this.handleInput("");
-      Realpub.emit(`chat::send::message::to::${contact.id}`, msg);
     }
   }
 
@@ -90,17 +88,17 @@ class ChatScreen extends PureComponent {
       (msg.status === "SENT" || msg.status === "RECEIVED") &&
       !isAlreadySent
     ) {
-      console.log(`chat::send::message::to::${contact.id}`, {
-        ...msg,
-        status: "READ",
-        timestamp: new Date(msg.timestamp)
-      });
+      // console.log(`chat::send::message::to::${contact.id}`, {
+      //   ...msg,
+      //   status: "READ",
+      //   timestamp: new Date(msg.timestamp)
+      // });
 
-      Realpub.emit(`chat::send::message::to::${contact.id}`, {
-        ...msg,
-        status: "READ",
-        timestamp: new Date(msg.timestamp)
-      });
+      // Realpub.emit(`chat::send::message::to::${contact.id}`, {
+      //   ...msg,
+      //   status: "READ",
+      //   timestamp: new Date(msg.timestamp)
+      // });
 
       this.setState({ messagesRead: [...messagesRead, msg] });
     }
