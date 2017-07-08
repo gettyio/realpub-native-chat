@@ -34,10 +34,13 @@ class ChatScreen extends PureComponent {
   }
 
   componentDidMount() {
-    realpub.store.addListener("change", () => {
-      console.log('forceUpdate')
-      this.forceUpdate();
-    });
+    const { user, contact } = this.props.location.state;
+    realpub
+      .getMessagesAsync(user._id, contact._id)
+      .addListener(() => {
+        const messages = realpub.getMessages(user._id, contact._id);
+        this.setState({ messages });
+      });
   }
 
   componentWillUnmount() {
