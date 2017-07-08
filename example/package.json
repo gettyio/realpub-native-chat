@@ -8,6 +8,9 @@
   },
   "dependencies": {
     "@realpub/native-chat": "1.1.11",
+    "axios": "^0.16.2",
+    "feathers-client": "^2.3.0",
+    "feathers-rest": "^1.8.0",
     "lodash": "^4.17.4",
     "moment": "^2.18.1",
     "native-base": "^2.2.0",

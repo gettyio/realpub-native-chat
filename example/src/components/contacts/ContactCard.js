@@ -9,8 +9,6 @@ import {
 } from "react-native";
 import { Link } from "react-router-native";
 
-import store from "./../../store";
-
 const Avatar = ({ img }) =>
   <View style={styles.photoColumn}>
     <Image
@@ -26,11 +24,11 @@ const Avatar = ({ img }) =>
     />
   </View>;
 
-const ContactInfo = ({ id, username, status }) =>
+const ContactInfo = ({ id, displayName, status }) =>
   <View style={styles.labelColumn}>
     <View style={styles.labelTitle}>
       <Text style={{ fontSize: 14 }}>
-        {username}
+        {displayName}
       </Text>
     </View>
     <View style={{}}>
@@ -41,10 +39,6 @@ const ContactInfo = ({ id, username, status }) =>
   </View>;
 
 const ContactBadge = props => {
-  const unreadedMessages = store
-    .objects("Message")
-    .filtered(`from = '${props.id}' AND status = 'RECEIVED'`);
-  console.log("unreadedMessages", unreadedMessages);
   return (
     <View
       style={{
@@ -73,14 +67,14 @@ const ContactBadge = props => {
             fontWeight: "600"
           }}
         >
-          0
+          {props.toRead}
         </Text>
       </View>
     </View>
   );
 };
 
-const ContactCard = ({ user, contact, apikey }) => {
+const ContactCard = ({ user, contact, apikey, toRead }) => {
   const statusColor = contact.status === "ONLINE" ? "#4bec13" : "red";
   return (
     <Link
@@ -108,7 +102,7 @@ const ContactCard = ({ user, contact, apikey }) => {
         />
       </View>
       <ContactInfo {...contact} />
-      <ContactBadge {...contact} />
+      <ContactBadge {...contact} toRead={toRead} />
     </Link>
   );
 };

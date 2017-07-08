@@ -16,7 +16,7 @@ import TextMessage from "./../components/chat/TextMessage";
 import MessageBlock from "./../components/chat/MessageBlock";
 import Thumbnail from "./../components/chat/Thumbnail";
 import Header from "./../components/Header";
-import store from "./../store";
+import realpub from './../lib/realpub'
 
 class ChatScreen extends PureComponent {
   constructor(props) {
@@ -33,15 +33,16 @@ class ChatScreen extends PureComponent {
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
   }
 
-  componentWillMount() {
-    store.addListener("change", () => {
+  componentDidMount() {
+    realpub.store.addListener("change", () => {
+      console.log('forceUpdate')
       this.forceUpdate();
     });
   }
 
   componentWillUnmount() {
     // Unregister all listeners
-    store.removeAllListeners();
+    realpub.store.removeAllListeners();
   }
 
   handleInput(text) {
@@ -55,15 +56,14 @@ class ChatScreen extends PureComponent {
       const { user, contact, apikey } = this.props.location.state;
       const textmessage = this.state.text;
       const msg = {
-        id: uuid(),
-        from: user.id,
-        to: contact.id,
-        msg: textmessage,
-        timestamp: new Date()
+        uuid: uuid(),
+        from: user._id,
+        to: contact._id,
+        body: textmessage,
+        status: 'SENT'
       };
-      store.write(() => {
-        store.create("Message", msg);
-      });
+      realpub.sendMessage(msg);
+
       this.handleInput("");
     }
   }
@@ -81,52 +81,39 @@ class ChatScreen extends PureComponent {
   sendReadEvent(msg) {
     const { contact } = this.props.location.state;
     const { messagesRead } = this.state;
-    const isAlreadySent =
-      messagesRead.length && messagesRead.find(m => m.id === msg.id);
-    if (
-      contact.id === msg.from &&
-      (msg.status === "SENT" || msg.status === "RECEIVED") &&
-      !isAlreadySent
-    ) {
-      // console.log(`chat::send::message::to::${contact.id}`, {
-      //   ...msg,
-      //   status: "READ",
-      //   timestamp: new Date(msg.timestamp)
-      // });
-
-      // Realpub.emit(`chat::send::message::to::${contact.id}`, {
-      //   ...msg,
-      //   status: "READ",
-      //   timestamp: new Date(msg.timestamp)
-      // });
-
+    const isAlreadySent = messagesRead.length && messagesRead.find(m => m.id === msg.id);
+    if (contact.id === msg.from && msg.status === "SENT" || msg.status === "RECEIVED" && !isAlreadySent) {
       this.setState({ messagesRead: [...messagesRead, msg] });
     }
   }
 
   renderMessageBlock({ item, index }) {
     const { user, contact, apikey } = this.props.location.state;
-    const from = user.id === item.from ? "user" : "contact";
 
-    this.sendReadEvent(item);
+    let from, withStatus;
+    if (user._id === item.from) {
+      from = "user";
+      withStatus = true;
+    } else {
+      from = "contact";
+      withStatus = false;
+    }
+
+    if(from && item.status === 'RECEIVED') {
+      realpub.updateLocalMessage(item, 'READ', true)
+    }
 
     return (
-      <MessageBlock withStatus key={index} status={item.status}>
-        <TextMessage message={item.msg} from={from} last />
+      <MessageBlock withStatus={withStatus} key={index} status={item.status}>
         <Thumbnail from={from} initials={"DI"} />
+        <TextMessage message={item.body} from={from} last />
       </MessageBlock>
     );
   }
 
   render() {
     const { user, contact } = this.props.location.state;
-    const messages = store
-      .objects("Message")
-      .filtered(
-        `(from = '${user.id}' AND to = '${contact.id}') OR (from = '${contact.id}' AND to = '${user.id}')`
-      );
-
-    const messageList = messages.map(x => Object.assign({}, x));
+    const messages = realpub.getMessages(user._id, contact._id);
 
     return (
       <Container>
@@ -143,7 +130,7 @@ class ChatScreen extends PureComponent {
           <Content padder style={styles.content}>
             <FlatList
               inverted={true}
-              data={messageList.reverse()}
+              data={messages}
               renderItem={this.renderMessageBlock}
               keyExtractor={(item, index) => `${item}-${index}`}
               style={{

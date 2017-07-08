@@ -1,17 +1,15 @@
 import React from "react";
+import moment from "moment";
 import { StyleSheet, Text, View } from "react-native";
 import { NativeRouter, Route, Link } from "react-router-native";
 import ContactListScreen from "./containers/ContactListScreen";
 import ChatScreen from "./containers/ChatScreen";
 
-import store from "./store";
-import moment from "moment";
+import realpub from './lib/realpub';
+//realpub.clearDB();
 
-//clean contacts on up
-store.write(() => {
-  store.deleteAll();
-});
 console.ignoredYellowBox = [
+  "Warning: Can only update a mounted or mounting component.",
   "Warning: Cannot update during an existing state transition",
   "Warning: checkPropTypes"
 ];
