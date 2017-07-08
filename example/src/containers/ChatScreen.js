@@ -24,11 +24,15 @@ class ChatScreen extends PureComponent {
 
     this.state = {
       text: "",
-      messagesRead: []
+      user: null,
+      contact: null,
+      intervalId: null,
+      messages: []
     };
 
     this.getInitials = this.getInitials.bind(this);
     this.handleInput = this.handleInput.bind(this);
+    this.loadMessages = this.loadMessages.bind(this);
     this.saveAndSendMessage = this.saveAndSendMessage.bind(this);
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
   }
@@ -39,13 +43,22 @@ class ChatScreen extends PureComponent {
       .getMessagesAsync(user._id, contact._id)
       .addListener(() => {
         const messages = realpub.getMessages(user._id, contact._id);
-        this.setState({ messages });
+        this.setState({ messages, user, contact });
       });
+
+    this.setState({ intervalId: setInterval(this.loadMessages, 1500) });  
   }
 
   componentWillUnmount() {
     // Unregister all listeners
     realpub.store.removeAllListeners();
+    clearInterval(this.state.intervalId);
+    
+  }
+
+  loadMessages() {
+    const { user } = this.state;
+    realpub.loadMessages(user._id);
   }
 
   handleInput(text) {
@@ -116,8 +129,7 @@ class ChatScreen extends PureComponent {
 
   render() {
     const { user, contact } = this.props.location.state;
-    const messages = realpub.getMessages(user._id, contact._id);
-
+    const messages = this.state.messages;
     return (
       <Container>
         <Header enableLeftBtn={true} />

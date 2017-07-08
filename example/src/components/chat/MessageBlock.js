@@ -5,8 +5,8 @@ import PropTypes from "prop-types";
 import DeliveryStatus from "./DeliveryStatus";
 
 const renderStatus = (withStatus, status) => {
-  //return withStatus && <DeliveryStatus status={status} />;
-  return <DeliveryStatus status={status} />;
+  return withStatus && <DeliveryStatus status={status} />;
+  //return <DeliveryStatus status={status} />;
 };
 
 const MessageBlock = ({ children, withStatus, status }) => {
