@@ -59,7 +59,7 @@ class ContactListScreen extends PureComponent {
   }
 
   showChatHistory() {
-    console.warn(1);
+    console.warn(2);
   }
 
   listenUpdates() {
