@@ -22,12 +22,10 @@ import Header from "./../components/Header";
 import ChatScreen from "./ChatScreen";
 import ContactCard from "./../components/contacts/ContactCard";
 
-import realpub from "./../lib/realpub";
-
 class ContactListScreen extends PureComponent {
   constructor(props) {
     super(props);
-
+    
     this.state = {
       isLoading: true,
       isChatReady: false,
@@ -41,16 +39,15 @@ class ContactListScreen extends PureComponent {
     this.renderContactList = this.renderContactList.bind(this);
     this.renderLoading = this.renderLoading.bind(this);
     this.showChatHistory = this.showChatHistory.bind(this);
-    this.loadMessages = this.loadMessages.bind(this);
     this.getTotalUnreadedMessages = this.getTotalUnreadedMessages.bind(this);
-
+    
+    const { realpub } = props;
     realpub.updateUser(props.user);
     realpub.updateContacts(props.contacts);
   }
 
   componentDidMount() {
     const { user } = this.props;
-    this.loadMessages(user._id);
     this.listenUpdates();
 
     this.setState({
@@ -63,16 +60,16 @@ class ContactListScreen extends PureComponent {
   }
 
   listenUpdates() {
+    const { realpub } = this.props;
+
     realpub.store.addListener('change', () => {
       this.forceUpdate();
     });
   }
 
-  loadMessages(userId) {
-    realpub.loadMessages(userId);
-  }
 
   getTotalUnreadedMessages(id) {
+    const { realpub } = this.props;
     return realpub.countMessages(id);
   }
 
@@ -103,6 +100,7 @@ class ContactListScreen extends PureComponent {
   }
 
   renderContactList() {
+    const { realpub } = this.props;
     const contacts = realpub.getContacts();
     return ( 
       <FlatList 
@@ -129,6 +127,7 @@ class ContactListScreen extends PureComponent {
     );
   }
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1

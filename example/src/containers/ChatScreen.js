@@ -16,7 +16,6 @@ import TextMessage from "./../components/chat/TextMessage";
 import MessageBlock from "./../components/chat/MessageBlock";
 import Thumbnail from "./../components/chat/Thumbnail";
 import Header from "./../components/Header";
-import realpub from './../lib/realpub'
 
 class ChatScreen extends PureComponent {
   constructor(props) {
@@ -38,27 +37,29 @@ class ChatScreen extends PureComponent {
   }
 
   componentDidMount() {
-    const { user, contact } = this.props.location.state;
+    const { realpub } = this.props;
+    const { user, contact, apikey } = this.props.location.state;
+    const messages = realpub.getMessages(user._id, contact._id);
     realpub
       .getMessagesAsync(user._id, contact._id)
       .addListener(() => {
         const messages = realpub.getMessages(user._id, contact._id);
         this.setState({ messages, user, contact });
       });
-
-    this.setState({ intervalId: setInterval(this.loadMessages, 1500) });  
+    this.setState({ messages, user, contact, apikey });
+    ///this.setState({ intervalId: setInterval(this.loadMessages, 1500) });  
   }
 
   componentWillUnmount() {
+    const { realpub } = this.props;
     // Unregister all listeners
     realpub.store.removeAllListeners();
-    clearInterval(this.state.intervalId);
-    
+    //clearInterval(this.state.intervalId);
   }
 
   loadMessages() {
     const { user } = this.state;
-    realpub.loadMessages(user._id);
+    //realpub.loadMessages(user._id);
   }
 
   handleInput(text) {
@@ -69,14 +70,15 @@ class ChatScreen extends PureComponent {
   // correspondent user
   saveAndSendMessage() {
     if (this.state.text) {
-      const { user, contact, apikey } = this.props.location.state;
-      const textmessage = this.state.text;
+      const { realpub } = this.props;
+      const { user, contact, apikey, text } = this.state;
+
       const msg = {
         uuid: uuid(),
         from: user._id,
         to: contact._id,
-        body: textmessage,
-        status: 'SENT'
+        body: text,
+        status: 'NEW'
       };
       realpub.sendMessage(msg);
 
@@ -104,7 +106,8 @@ class ChatScreen extends PureComponent {
   }
 
   renderMessageBlock({ item, index }) {
-    const { user, contact, apikey } = this.props.location.state;
+    const { realpub } = this.props;
+    const { user, contact, apikey } = this.state;
 
     let from, withStatus;
     if (user._id === item.from) {
@@ -116,7 +119,7 @@ class ChatScreen extends PureComponent {
     }
 
     if(from && item.status === 'RECEIVED') {
-      realpub.updateLocalMessage(item, 'READ', true)
+      realpub.markAsRead(item)
     }
 
     return (
