@@ -61,12 +61,10 @@ class ContactListScreen extends PureComponent {
 
   listenUpdates() {
     const { realpub } = this.props;
-
     realpub.store.addListener('change', () => {
       this.forceUpdate();
     });
   }
-
 
   getTotalUnreadedMessages(id) {
     const { realpub } = this.props;
