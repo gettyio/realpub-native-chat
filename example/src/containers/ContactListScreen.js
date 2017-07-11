@@ -117,9 +117,10 @@ class ContactListScreen extends PureComponent {
   }
 
   render() {
+    const { user } = this.props;
     return ( 
       <View style = {styles.container} >
-        <Header enableLeftBtn = {false} /> 
+        <Header enableLeftBtn={false} user={user} /> 
         {this.handleRenderer()} 
       </View>
     );

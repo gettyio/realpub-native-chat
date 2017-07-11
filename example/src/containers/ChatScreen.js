@@ -135,7 +135,7 @@ class ChatScreen extends PureComponent {
     const messages = this.state.messages;
     return (
       <Container>
-        <Header enableLeftBtn={true} />
+        <Header enableLeftBtn={true} user={user} />
         <Image
           source={require("./../assets/img/gplaypattern.png")}
           style={{

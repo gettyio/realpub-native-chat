@@ -8,12 +8,16 @@ const MSG_RECEIVED = 'RECEIVED';
 //const api = feathers().configure(rest("http://localhost:3030").axios(axios));
 import Realpub from './../realpub-client';
 
+
+
 let conn;
 const connect = async (uID)=> {
   conn = await Realpub.connect(`http://localhost:8080?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
   conn.on('open', function () {
+
     // receive a new message from a friend
     conn.on(`realpub::message::${uID}`, (msg, cb)=> {
+      console.warn('message received')
       // Save local NEW message
       store.write(() => {
         store.create("Messages", msg, true);
@@ -132,12 +136,13 @@ const updateContacts = (contacts)=> {
 }
 
 const sendMessage = (msg)=> {
+  console.log(conn)
   // Save local NEW message
   store.write(() => {
     store.create("Messages", msg);
   });
   // Save remote NEW message
-  conn.send('realpub::send::message', msg, (status)=> {
+  conn.send('realpub::send::message', {...msg, connId: conn.id } , (status)=> {
     store.write(() => {
       // Update local with SENT ack from server
       store.create("Messages", { ...msg, status }, true); // server ack
