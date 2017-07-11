@@ -1,7 +1,4 @@
 // To create a client side application
-import feathers from "feathers/client";
-import rest from "feathers-rest/client";
-import axios from "axios";
 import store from './store';
 
 const MSG_SENT = 'SENT';
@@ -12,16 +9,22 @@ const MSG_RECEIVED = 'RECEIVED';
 import Realpub from './../realpub-client';
 
 let conn;
-const connect = (uID)=> {
-  conn = Realpub.connect(`http://localhost:8080?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
+const connect = async (uID)=> {
+  conn = await Realpub.connect(`http://localhost:8080?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
   conn.on('open', function () {
     // receive a new message from a friend
-    conn.on(`realpub::message::${uID}`, function (msg, cb) {
+    conn.on(`realpub::message::${uID}`, (msg, cb)=> {
       // Save local NEW message
       store.write(() => {
         store.create("Messages", msg, true);
       });
       cb({ ...msg, status: 'RECEIVED' });
+    });
+
+    conn.on(`realpub::read::from::${uID}`, (msg, cb)=> {
+        store.write(() => {
+          store.create("Messages", msg, true);
+        });      
     });
 
     // receive messages to sync

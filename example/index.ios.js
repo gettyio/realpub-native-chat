@@ -39,7 +39,7 @@ export default class ReactNativeChatDemo extends Component {
     ];
 
     const user = {
-      _id: "2",
+      _id: "1",
       fullName: "Dio Ianakiara",
       displayName: "dio",
       status: "Life is Good!",
