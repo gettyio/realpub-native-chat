@@ -88,7 +88,7 @@ const updateLocalMessage = (msg, status, shouldAck = false) => {
   //console.log('status, ',status, msg)
   store.write(() => {
     store.create("Messages", {...msg, status}, true);
-    if(shouldAck){
+    if (shouldAck) {
       ack({...msg, status})
     }
   });
