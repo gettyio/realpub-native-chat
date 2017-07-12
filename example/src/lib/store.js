@@ -83,5 +83,5 @@ Messages.schema = MessagesSchema;
 
 export default new Realm({
   schema: [Users, Contacts, Messages],
-  schemaVersion: 4
+  schemaVersion: 19
 });

@@ -15,6 +15,10 @@ const connect = async (uID)=> {
   conn = await Realpub.connect(`http://localhost:8080?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
   conn.on('open', function () {
 
+    conn.on('data', (msg, cb)=> {
+      console.warn(msg);
+    })
+
     // receive a new message from a friend
     conn.on(`realpub::message::${uID}`, (msg, cb)=> {
       console.warn('message received')
