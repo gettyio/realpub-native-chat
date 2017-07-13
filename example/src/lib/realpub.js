@@ -23,7 +23,10 @@ const connect = async (uID)=> {
           break;          
         case 'READ': 
           events.update(conn, msg.data);
-          break;                
+          break;         
+        case 'SYNC': 
+          events.sync(conn, msg.data);
+          break;                          
         default:
           break;
       }
@@ -49,25 +52,44 @@ const connect = async (uID)=> {
     //   send an array of message ids to mark as RECEIVED on remote db
     //   cb([]); //confirm action
     // });
-
+    checkSentMessageStatus(uID);
     // resend NEW messages that went offline
-    // resendOfflineMessages();               
+    resendOfflineMessages(uID);               
   });
 }
 
-const resendOfflineMessages = ()=> {
-    const messages = store.objects("Messages").filtered(`status = 'NEW'`);
-    messages.map(msg => {
-      // Save remote NEW message
-      conn.send('realpub::message', msg, (status)=> {
-        store.write(() => {
-          // Update local with SENT ack from server
-          store.create("Messages", { ...msg, status }, true); // server ack
-        });    
-      });
+const checkSentMessageStatus = (uID)=> {
+  const messages = store.objects("Messages").filtered(`from = '${uID}' AND status = 'SENT'`);
+  messages.map(msg => {
+  // Save remote NEW message
+    conn.send('realpub::message::status', {...msg, connId: conn.id } , (nextMsg, err)=> {
+      if (!err) {
+        if(msg.status !== nextMsg.status) {
+          store.write(() => {
+            // Update local with SENT ack from server
+            store.create("Messages", nextMsg, true); // server ack
+          });
+        }
+      }
     });
+  });
 }
 
+const resendOfflineMessages = (uID)=> {
+    const messages = store.objects("Messages").filtered(`from = '${uID}' AND status = 'NEW'`);
+    messages.map(msg => {
+      // Save remote NEW message
+      conn.send('realpub::message', {...msg, connId: conn.id } , (nextMsg, err)=> {
+        console.warn(nextMsg)
+        if (!err) {
+          store.write(() => {
+            // Update local with SENT ack from server
+            store.create("Messages", nextMsg, true); // server ack
+          });
+        }
+      });      
+    });
+}
 
 const addListener = (cb) => {
   store.addListener("change", () => {

@@ -1,7 +1,10 @@
 import store from './store';
 
-export const ack = (conn, msg)=> {
-
+export const sync = (conn, msgs)=> {
+  msgs.map(message => {
+    const status = 'RECEIVED';
+    save(conn, message);
+  });
 }
 
 export const save = (conn, msg)=> {
