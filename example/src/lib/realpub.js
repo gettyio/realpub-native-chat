@@ -1,9 +1,6 @@
 // To create a client side application
 import store from './store';
-
-const MSG_SENT = 'SENT';
-const MSG_READ = 'READ';
-const MSG_RECEIVED = 'RECEIVED';
+import * as events from './events';
 
 //const api = feathers().configure(rest("http://localhost:3030").axios(axios));
 import Realpub from './../realpub-client';
@@ -15,72 +12,62 @@ const connect = async (uID)=> {
   conn = await Realpub.connect(`http://localhost:8080?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
   conn.on('open', function () {
 
-    conn.on('data', (msg, cb)=> {
-      console.warn(msg);
-    })
-
     // receive a new message from a friend
-    conn.on(`realpub::message::${uID}`, (msg, cb)=> {
-      console.warn('message received')
+    conn.on('data', (msg)=> {
+      switch (msg.type) {
+        case 'NEW':
+          events.save(conn, msg.data);
+          break;
+        case 'RECEIVED': 
+          events.update(conn, msg.data);
+          break;          
+        case 'READ': 
+          events.update(conn, msg.data);
+          break;                
+        default:
+          break;
+      }
       // Save local NEW message
-      store.write(() => {
-        store.create("Messages", msg, true);
-      });
-      cb({ ...msg, status: 'RECEIVED' });
-    });
-
-    conn.on(`realpub::read::from::${uID}`, (msg, cb)=> {
-        store.write(() => {
-          store.create("Messages", msg, true);
-        });      
+      // store.write(() => {
+      //   store.create("Messages", msg, true);
+      // });
+      //cb({ ...msg, status: 'RECEIVED' });
     });
 
     // receive messages to sync
-    conn.on(`realpub::sync::${uID}`, function (msgs, cb) {
-      let ids = [];
-      msgs.map(m => {
-        let status;
-        if (m.status === 'SENT' || 'RECEIVED') {
-          status = 'RECEIVED';
-        } else if (m.status === 'READ') {
-          status = 'READ';
-        }
+    // conn.on(`realpub::sync::${uID}`, function (msgs, cb) {
+    //   console.warn('received sync', msgs)
+    //   let ids = [];
+    //   msgs.map(m => {
+    //     const status = 'RECEIVED';
+    //     store.write(() => {
+    //       store.create("Messages", {...m, status}, true);
+    //     });
 
-        store.write(() => {
-          store.create("Messages", {...m, status}, true);
-        });
-
-        ids.push({_id: m._id, status: status});
-      });
-      // send an array of message ids to mark as RECEIVED on remote db
-      cb(ids); //confirm action
-    });
+    //     ids.push({_id: m._id, status: status});
+    //   });
+    //   send an array of message ids to mark as RECEIVED on remote db
+    //   cb([]); //confirm action
+    // });
 
     // resend NEW messages that went offline
+    // resendOfflineMessages();               
+  });
+}
+
+const resendOfflineMessages = ()=> {
     const messages = store.objects("Messages").filtered(`status = 'NEW'`);
     messages.map(msg => {
       // Save remote NEW message
-      conn.send('realpub::send::message', msg, (status)=> {
+      conn.send('realpub::message', msg, (status)=> {
         store.write(() => {
           // Update local with SENT ack from server
           store.create("Messages", { ...msg, status }, true); // server ack
         });    
       });
-    });                   
-  });
+    });
 }
 
-const ack = (msg, status)=> {
-  // return api
-  //   .service("messages")
-  //   .update(msg._id, msg)
-  //   .then(response => {
-  //     console.log('************************* ',response.status)
-  //   })
-  //   .catch(error => {
-  //     console.log(error);
-  //   });
-}
 
 const addListener = (cb) => {
   store.addListener("change", () => {
@@ -103,27 +90,22 @@ const updateLocalMessage = (msg, status, shouldAck = false) => {
 }
 
 const markAsRead = (msg) => {
-    const status = 'READ';
-    console.log(msg)
-    if (msg.status === 'RECEIVED') {
-      conn.send('realpub::read::message', {...msg, status } , (msgAck, err)=> {
-        if (err) {
-          console.warn('ERROR', err)
-        } else {
-          console.log('msgAck', msgAck)
-          store.write(() => {
-            // Update local with SENT ack from server
-            store.create("Messages", msgAck, true); // server ack
-          });
-        }
-      });  
+  conn.send('realpub::message::read', {...msg, status: 'READ' } , (msgAck, err)=> {
+    if (err) {
+      console.warn('ERROR', err)
+    } else {
+      store.write(() => {
+        // Update local with SENT ack from server
+        store.create("Messages", msgAck, true); // server ack
+      });
     }
+  });
 }
 
 const countMessages = (id)=> {
   return store
           .objects("Messages")
-          .filtered(`from = '${id}' AND status = '${MSG_RECEIVED}'`)
+          .filtered(`from = '${id}' AND status = 'RECEIVED'`)
           .length;
 }
 
@@ -140,17 +122,18 @@ const updateContacts = (contacts)=> {
 }
 
 const sendMessage = (msg)=> {
-  console.log(conn)
   // Save local NEW message
   store.write(() => {
     store.create("Messages", msg);
   });
   // Save remote NEW message
-  conn.send('realpub::send::message', {...msg, connId: conn.id } , (status)=> {
-    store.write(() => {
-      // Update local with SENT ack from server
-      store.create("Messages", { ...msg, status }, true); // server ack
-    });    
+  conn.send('realpub::message', {...msg, connId: conn.id } , (nextMsg, err)=> {
+    if (!err) {
+      store.write(() => {
+        // Update local with SENT ack from server
+        store.create("Messages", nextMsg, true); // server ack
+      });
+    }
   });
 }
 
@@ -183,7 +166,6 @@ const clearDB = ()=> {
 }
 
 const realpub = {
-  ack,
   store,
   countMessages,
   clearDB,

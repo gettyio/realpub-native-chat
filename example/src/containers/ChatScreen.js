@@ -118,7 +118,7 @@ class ChatScreen extends PureComponent {
       withStatus = false;
     }
 
-    if(from && item.status === 'RECEIVED') {
+    if(from === "contact" && item.status === 'RECEIVED') {
       realpub.markAsRead(item)
     }
 
@@ -135,7 +135,7 @@ class ChatScreen extends PureComponent {
     const messages = this.state.messages;
     return (
       <Container>
-        <Header enableLeftBtn={true} user={user} />
+        <Header enableLeftBtn={true} user={contact} />
         <Image
           source={require("./../assets/img/gplaypattern.png")}
           style={{
