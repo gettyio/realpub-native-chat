@@ -22,6 +22,7 @@ import {
 import Header from "./../components/Header";
 import ChatScreen from "./ChatScreen";
 import ContactCard from "./../components/contacts/ContactCard";
+import ContactCardBlank from "./../components/contacts/ContactCardBlank";
 
 class ContactListScreen extends Component {
   constructor(props) {
@@ -37,6 +38,7 @@ class ContactListScreen extends Component {
     };
 
     this.renderRow = this.renderRow.bind(this);
+    this.renderHeader = this.renderHeader.bind(this);
     this.handleRenderer = this.handleRenderer.bind(this);
     this.renderContactList = this.renderContactList.bind(this);
     this.renderLoading = this.renderLoading.bind(this);
@@ -85,11 +87,27 @@ class ContactListScreen extends Component {
   renderRow(row) {
     const {
       user,
-      apikey
+      apikey,
+      renderContactsRow,
     } = this.props;
 
+    if (renderContactsRow) {
+      return (
+        <ContactCardBlank
+          key={row.index }
+          apikey={apikey}
+          user={user}
+          contact={row.item}
+          toRead={row.item.toRead}        
+        >
+          {renderContactsRow(row.item)}
+        </ContactCardBlank>
+      )
+    }
+
     return ( 
-      <ContactCard key={row.index }
+      <ContactCard 
+        key={row.index }
         apikey={apikey}
         user={user}
         contact={row.item}
@@ -124,11 +142,25 @@ class ContactListScreen extends Component {
     return this.renderContactList();
   }
 
+  renderHeader() {
+    const { user, hideHeader, renderContactsHeader } = this.props;
+    if (hideHeader) {
+      return <View></View>;
+    }
+    
+    if (renderContactsHeader) {
+      return renderContactsHeader(user);
+    }
+
+    return (
+       <Header enableLeftBtn={false} user={user} />
+    );
+  }
+
   render() {
-    const { user } = this.props;
     return ( 
       <View style = {styles.container} >
-        <Header enableLeftBtn={false} user={user} /> 
+        {this.renderHeader()}
         {this.handleRenderer()} 
       </View>
     );

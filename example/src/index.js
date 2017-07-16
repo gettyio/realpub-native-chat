@@ -14,14 +14,14 @@ console.ignoredYellowBox = [
 ];
 
 const RealpubNativeChat = props => {
-  const { contacts, user, apikey } = props;
+  const { user, apikey } = props;
   const realpub = Realpub(user._id);
   //realpub.clearDB();
   return (
     <NativeRouter>
       <View style={{ flex: 1, width: "100%", height: "100%" }}>
         <Route exact path="/" render={() => <ContactListScreen {...props} realpub={realpub} />} />
-        <Route path="/chat" render={propz => <ChatScreen {...propz} realpub={realpub} />}  />
+        <Route path="/chat" render={propz => <ChatScreen {...props} {...propz} realpub={realpub} />}  />
       </View>
     </NativeRouter>
   );

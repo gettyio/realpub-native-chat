@@ -33,6 +33,7 @@ class ChatScreen extends PureComponent {
 
     this.getInitials = this.getInitials.bind(this);
     this.handleInput = this.handleInput.bind(this);
+    this.renderHeader = this.renderHeader.bind(this);
     this.saveAndSendMessage = this.saveAndSendMessage.bind(this);
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
@@ -44,11 +45,11 @@ class ChatScreen extends PureComponent {
     realpub
       .getMessagesAsync(user._id, contact._id)
       .addListener(() => {
-        const messages = realpub.getMessages(user._id, contact._id);
+        const messages = realpub.getMessages(user._id, contact._id).slice(0, 10);
         this.setState({ messages, user, contact });
       });
 
-    const messages = realpub.getMessages(user._id, contact._id);
+    const messages = realpub.getMessages(user._id, contact._id).slice(0, 10);
     this.setState({ messages, user, contact, apikey });
 
     realpub.checkSentMessageStatus(user._id);
@@ -144,14 +145,27 @@ class ChatScreen extends PureComponent {
     );
   }
 
-  render() {
+  renderHeader() {
     const { user, contact } = this.props.location.state;
-    const messages = this.state.messages;
+    const { renderChatHeader } = this.props;
+    if (renderChatHeader) {
+      return renderChatHeader(contact);
+    }
+    return (
+      <Header enableLeftBtn={true} user={contact} />
+    )
+  }
+
+  render() {
+    const { chatBgImg } = this.props;
+    const { messages } = this.state;
+    const bgImg = chatBgImg ? chatBgImg : require("./../assets/img/gplaypattern.png")
+
     return (
       <Container>
-        <Header enableLeftBtn={true} user={contact} />
+        {this.renderHeader()}
         <Image
-          source={require("./../assets/img/gplaypattern.png")}
+          source={bgImg}
           style={{
             flex: 1,
             width: null,
@@ -182,6 +196,7 @@ class ChatScreen extends PureComponent {
               autoCorrect={false}
               value={this.state.text}
               onChangeText={this.handleInput}
+              autoFocus={true}
             />
             <TouchableOpacity
               onPress={this.saveAndSendMessage}
