@@ -7,6 +7,7 @@ import {
   Text,
   FlatList,
   Image,
+  AppState,
   KeyboardAvoidingView
 } from "react-native";
 import uuid from "uuid/v4";
@@ -16,8 +17,6 @@ import TextMessage from "./../components/chat/TextMessage";
 import MessageBlock from "./../components/chat/MessageBlock";
 import Thumbnail from "./../components/chat/Thumbnail";
 import Header from "./../components/Header";
-import Realpub from "./../services/realpub";
-import store from "./../store";
 
 class ChatScreen extends PureComponent {
   constructor(props) {
@@ -25,24 +24,57 @@ class ChatScreen extends PureComponent {
 
     this.state = {
       text: "",
-      messagesRead: []
+      user: null,
+      contact: null,
+      intervalId: null,
+      messages: [],
+      appState: AppState.currentState
     };
 
     this.getInitials = this.getInitials.bind(this);
     this.handleInput = this.handleInput.bind(this);
+    this.renderHeader = this.renderHeader.bind(this);
     this.saveAndSendMessage = this.saveAndSendMessage.bind(this);
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
+    this.handleAppStateChange = this.handleAppStateChange.bind(this);
   }
 
-  componentWillMount() {
-    store.addListener("change", () => {
-      this.forceUpdate();
-    });
+  componentDidMount() {
+    const { realpub } = this.props;
+    const { user, contact, apikey } = this.props.location.state;
+    realpub
+      .getMessagesAsync(user._id, contact._id)
+      .addListener(() => {
+        const messages = realpub.getMessages(user._id, contact._id).slice(0, 10);
+        this.setState({ messages, user, contact });
+      });
+
+    const messages = realpub.getMessages(user._id, contact._id).slice(0, 10);
+    this.setState({ messages, user, contact, apikey });
+
+    realpub.checkSentMessageStatus(user._id);
+    realpub.resendOfflineMessages(user._id);
+
+    AppState.addEventListener('change', this.handleAppStateChange);
   }
 
   componentWillUnmount() {
+    const { realpub } = this.props;
     // Unregister all listeners
-    store.removeAllListeners();
+    realpub.store.removeAllListeners();
+    AppState.removeEventListener('change', this.handleAppStateChange);
+  }
+
+  handleAppStateChange = (nextAppState) => {
+    const { realpub, user } = this.props;
+    
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.warn('App has come to the foreground!')
+      // App has come to the foreground!
+      realpub.checkSentMessageStatus(user._id);
+      realpub.resendOfflineMessages(user._id);
+    }
+    this.setState({appState: nextAppState});
   }
 
   handleInput(text) {
@@ -53,20 +85,19 @@ class ChatScreen extends PureComponent {
   // correspondent user
   saveAndSendMessage() {
     if (this.state.text) {
-      const { user, contact, apikey } = this.props.location.state;
-      const textmessage = this.state.text;
+      const { realpub } = this.props;
+      const { user, contact, apikey, text } = this.state;
+
       const msg = {
-        id: uuid(),
-        from: user.id,
-        to: contact.id,
-        msg: textmessage,
-        timestamp: new Date()
+        uuid: uuid(),
+        from: user._id,
+        to: contact._id,
+        body: text,
+        status: 'NEW'
       };
-      store.write(() => {
-        store.create("Message", msg);
-      });
+      realpub.sendMessage(msg);
+
       this.handleInput("");
-      Realpub.emit(`chat::send::message::to::${contact.id}`, msg);
     }
   }
 
@@ -83,58 +114,58 @@ class ChatScreen extends PureComponent {
   sendReadEvent(msg) {
     const { contact } = this.props.location.state;
     const { messagesRead } = this.state;
-    const isAlreadySent =
-      messagesRead.length && messagesRead.find(m => m.id === msg.id);
-    if (
-      contact.id === msg.from &&
-      (msg.status === "SENT" || msg.status === "RECEIVED") &&
-      !isAlreadySent
-    ) {
-      console.log(`chat::send::message::to::${contact.id}`, {
-        ...msg,
-        status: "READ",
-        timestamp: new Date(msg.timestamp)
-      });
-
-      Realpub.emit(`chat::send::message::to::${contact.id}`, {
-        ...msg,
-        status: "READ",
-        timestamp: new Date(msg.timestamp)
-      });
-
+    const isAlreadySent = messagesRead.length && messagesRead.find(m => m.id === msg.id);
+    if (contact.id === msg.from && msg.status === "SENT" || msg.status === "RECEIVED" && !isAlreadySent) {
       this.setState({ messagesRead: [...messagesRead, msg] });
     }
   }
 
   renderMessageBlock({ item, index }) {
-    const { user, contact, apikey } = this.props.location.state;
-    const from = user.id === item.from ? "user" : "contact";
+    const { realpub } = this.props;
+    const { user, contact, apikey } = this.state;
 
-    this.sendReadEvent(item);
+    let from, withStatus;
+    if (user._id === item.from) {
+      from = "user";
+      withStatus = true;
+    } else {
+      from = "contact";
+      withStatus = false;
+    }
+
+    if(from === "contact" && item.status === 'RECEIVED') {
+      realpub.markAsRead(item)
+    }
 
     return (
-      <MessageBlock withStatus key={index} status={item.status}>
-        <TextMessage message={item.msg} from={from} last />
+      <MessageBlock withStatus={withStatus} key={index} status={item.status}>
         <Thumbnail from={from} initials={"DI"} />
+        <TextMessage message={item.body} from={from} last />
       </MessageBlock>
     );
   }
 
-  render() {
+  renderHeader() {
     const { user, contact } = this.props.location.state;
-    const messages = store
-      .objects("Message")
-      .filtered(
-        `(from = '${user.id}' AND to = '${contact.id}') OR (from = '${contact.id}' AND to = '${user.id}')`
-      );
+    const { renderChatHeader } = this.props;
+    if (renderChatHeader) {
+      return renderChatHeader(contact);
+    }
+    return (
+      <Header enableLeftBtn={true} user={contact} />
+    )
+  }
 
-    const messageList = messages.map(x => Object.assign({}, x));
+  render() {
+    const { chatBgImg } = this.props;
+    const { messages } = this.state;
+    const bgImg = chatBgImg ? chatBgImg : require("./../assets/img/gplaypattern.png")
 
     return (
       <Container>
-        <Header enableLeftBtn={true} />
+        {this.renderHeader()}
         <Image
-          source={require("./../assets/img/gplaypattern.png")}
+          source={bgImg}
           style={{
             flex: 1,
             width: null,
@@ -145,7 +176,7 @@ class ChatScreen extends PureComponent {
           <Content padder style={styles.content}>
             <FlatList
               inverted={true}
-              data={messageList.reverse()}
+              data={messages}
               renderItem={this.renderMessageBlock}
               keyExtractor={(item, index) => `${item}-${index}`}
               style={{
@@ -165,6 +196,7 @@ class ChatScreen extends PureComponent {
               autoCorrect={false}
               value={this.state.text}
               onChangeText={this.handleInput}
+              autoFocus={true}
             />
             <TouchableOpacity
               onPress={this.saveAndSendMessage}

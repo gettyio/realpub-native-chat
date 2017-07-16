@@ -24,11 +24,11 @@ const Avatar = ({ img }) =>
     />
   </View>;
 
-const ContactInfo = ({ id, username, status }) =>
+const ContactInfo = ({ id, displayName, status }) =>
   <View style={styles.labelColumn}>
     <View style={styles.labelTitle}>
       <Text style={{ fontSize: 14 }}>
-        {username}
+        {displayName}
       </Text>
     </View>
     <View style={{}}>
@@ -38,40 +38,44 @@ const ContactInfo = ({ id, username, status }) =>
     </View>
   </View>;
 
-const ContactBadge = () =>
-  <View
-    style={{
-      width: 60,
-      alignItems: "flex-start",
-      justifyContent: "center",
-      paddingLeft: 8
-    }}
-  >
+const ContactBadge = props => {
+  return (
     <View
       style={{
-        width: 20,
-        height: 16,
-        backgroundColor: "red",
-        alignItems: "center",
+        width: 60,
+        alignItems: "flex-start",
         justifyContent: "center",
-        borderRadius: 8
+        paddingLeft: 8
       }}
     >
-      <Text
+      <View
         style={{
-          color: "white",
-          fontSize: 10,
-          justifyContent: "center",
+          width: 20,
+          height: 16,
+          backgroundColor: "red",
           alignItems: "center",
-          fontWeight: "600"
+          justifyContent: "center",
+          borderRadius: 8
         }}
       >
-        0
-      </Text>
+        <Text
+          style={{
+            color: "white",
+            fontSize: 10,
+            justifyContent: "center",
+            alignItems: "center",
+            fontWeight: "600"
+          }}
+        >
+          {props.toRead}
+        </Text>
+      </View>
     </View>
-  </View>;
+  );
+};
 
-const ContactCard = ({ user, contact, apikey }) => {
+const ContactCard = ({ user, contact, apikey, toRead }) => {
+  const statusColor = contact.status === "ONLINE" ? "#4bec13" : "red";
   return (
     <Link
       to={{
@@ -81,9 +85,24 @@ const ContactCard = ({ user, contact, apikey }) => {
       style={styles.row}
       component={TouchableOpacity}
     >
-      <Avatar img={contact.avatar} />
+      <View>
+        <Avatar img={contact.avatar} />
+        <View
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: 7,
+            backgroundColor: statusColor,
+            borderWidth: 1,
+            borderColor: "rgba(255, 255, 255, 1)",
+            position: "absolute",
+            top: 8,
+            right: 0
+          }}
+        />
+      </View>
       <ContactInfo {...contact} />
-      <ContactBadge />
+      <ContactBadge {...contact} toRead={toRead} />
     </Link>
   );
 };

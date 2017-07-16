@@ -1,69 +1,27 @@
 import React from "react";
-import { Provider } from "react-redux";
-
+import moment from "moment";
 import { StyleSheet, Text, View } from "react-native";
 import { NativeRouter, Route, Link } from "react-router-native";
-
 import ContactListScreen from "./containers/ContactListScreen";
 import ChatScreen from "./containers/ChatScreen";
 
-import store from "./store";
-import moment from "moment";
-import Realpub from "./services/realpub";
+import Realpub from './lib/realpub';
 
-//clean contacts on up
-store.write(() => {
-  store.deleteAll();
-});
 console.ignoredYellowBox = [
+  "Warning: Can only update a mounted or mounting component.",
   "Warning: Cannot update during an existing state transition",
   "Warning: checkPropTypes"
 ];
 
 const RealpubNativeChat = props => {
-  const { contacts, user, apikey } = props;
-
-  Realpub.init(props.apikey)
-    .then(socket => {
-      socket.on(`chat::send::message::to::${user.id}`, data => {
-        if (data.status === "SENT") {
-          data.status = "RECEIVED";
-          socket.emit(`chat::send::message::to::${data.from}`, {
-            ...data,
-            timestamp: new Date(data.timestamp)
-          });
-        }
-
-        store.write(() => {
-          store.create(
-            "Message",
-            {
-              ...data,
-              timestamp: new Date(data.timestamp)
-            },
-            true
-          );
-        });
-      });
-
-      contacts.map(item => {
-        Realpub.send(`send('chat::get::conversation'`, {
-          apikey,
-          to: user.id,
-          from: item.id
-        });
-      });
-
-      Realpub.on(`chat::${user.id}::got::conversation`, data => {
-        console.log(data);
-      });
-    })
-    .catch(err => console.error(err));
+  const { user, apikey } = props;
+  const realpub = Realpub(user._id);
+  //realpub.clearDB();
   return (
     <NativeRouter>
       <View style={{ flex: 1, width: "100%", height: "100%" }}>
-        <Route exact path="/" render={() => <ContactListScreen {...props} />} />
-        <Route path="/chat" render={propz => <ChatScreen {...propz} />} />
+        <Route exact path="/" render={() => <ContactListScreen {...props} realpub={realpub} />} />
+        <Route path="/chat" render={propz => <ChatScreen {...props} {...propz} realpub={realpub} />}  />
       </View>
     </NativeRouter>
   );

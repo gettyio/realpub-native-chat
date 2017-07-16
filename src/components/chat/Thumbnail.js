@@ -30,7 +30,6 @@ const styles = {
     height: 25,
     justifyContent: "center",
     alignItems: "center",
-    position: "absolute",
     bottom: 2
   },
   contactThumbnail: {

@@ -6,13 +6,31 @@ import DeliveryStatus from "./DeliveryStatus";
 
 const renderStatus = (withStatus, status) => {
   return withStatus && <DeliveryStatus status={status} />;
+  //return <DeliveryStatus status={status} />;
 };
 
-const MessageBlock = ({ children, withStatus, status }) =>
-  <View style={styles}>
-    {children}
-    {renderStatus(withStatus, status)}
-  </View>;
+const MessageBlock = ({ children, withStatus, status }) => {
+
+  let customStyle = {};
+  if (!withStatus) {
+    customStyle = {
+      flex: 1, 
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      justifyContent: 'flex-start'
+    }
+  }
+
+  return (
+      <View style={styles}>
+        <View style={customStyle}>
+          {children}
+          {renderStatus(withStatus, status)}
+        </View>
+      </View>
+  )
+}
+
 
 MessageBlock.propTypes = {
   children: PropTypes.node.isRequired,
@@ -24,8 +42,7 @@ MessageBlock.defaultProps = {
 };
 
 const styles = {
-  position: "relative",
-  marginVertical: 5,
+  marginVertical: 10,
   paddingHorizontal: 0,
   marginBottom: 12,
   transform: [{ scaleY: -1 }]

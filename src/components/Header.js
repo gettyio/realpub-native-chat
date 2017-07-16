@@ -40,7 +40,7 @@ const RightBtn = () =>
     <Text style={{ color: "white", fontWeight: "700" }}>Back</Text>
   </TouchableOpacity>;
 
-const Header = ({ barStyle, enableLeftBtn }) =>
+const Header = ({ barStyle, enableLeftBtn, user }) =>
   <View style={styles.header}>
     <StatusBar barStyle={`${barStyle || "light-content"}`} />
     <View
@@ -51,7 +51,7 @@ const Header = ({ barStyle, enableLeftBtn }) =>
       }}
     >
       <View style={{ flex: 1, alignItems: "center" }}>
-        <Text style={styles.title}>Realpub Contact List</Text>
+        <Text style={styles.title}>{user.fullName}</Text>
       </View>
 
       <LeftBtn enableLeftBtn={enableLeftBtn} />
