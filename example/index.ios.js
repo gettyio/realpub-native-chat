@@ -7,8 +7,8 @@
 import React, { Component } from "react";
 import { AppRegistry, StyleSheet, Text, View } from "react-native";
 
-//import RealpubNativeChat from "@realpub/native-chat";
-import RealpubNativeChat from "./src/index";
+import RealpubNativeChat from "@realpub/native-chat";
+//import RealpubNativeChat from "./src/index";
 
 export default class ReactNativeChatDemo extends Component {
     /**
@@ -37,6 +37,7 @@ export default class ReactNativeChatDemo extends Component {
         </View>
       )
     }
+
 
     renderHeader = (user) => {
       return (
@@ -84,7 +85,7 @@ export default class ReactNativeChatDemo extends Component {
         "https://s3.amazonaws.com/uifaces/faces/twitter/adhamdannaway/128.jpg"
     };
 
-    const userBg = require("./src/assets/img/ubg.png");
+    const userBg = require("./ubg.png");
     return (
       <View style={styles.container}>
         <RealpubNativeChat

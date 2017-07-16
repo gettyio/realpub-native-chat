@@ -74,6 +74,24 @@ const ContactBadge = props => {
   );
 };
 
+const StatusBadge = ({ color })=> {
+  return (
+    <View
+      style={{
+        width: 14,
+        height: 14,
+        borderRadius: 7,
+        backgroundColor: color,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 1)",
+        position: "absolute",
+        top: 8,
+        right: 0
+      }}
+    />
+  )
+}
+
 const ContactCard = ({ user, contact, apikey, toRead }) => {
   const statusColor = contact.status === "ONLINE" ? "#4bec13" : "red";
   return (
@@ -87,19 +105,6 @@ const ContactCard = ({ user, contact, apikey, toRead }) => {
     >
       <View>
         <Avatar img={contact.avatar} />
-        <View
-          style={{
-            width: 14,
-            height: 14,
-            borderRadius: 7,
-            backgroundColor: statusColor,
-            borderWidth: 1,
-            borderColor: "rgba(255, 255, 255, 1)",
-            position: "absolute",
-            top: 8,
-            right: 0
-          }}
-        />
       </View>
       <ContactInfo {...contact} />
       <ContactBadge {...contact} toRead={toRead} />

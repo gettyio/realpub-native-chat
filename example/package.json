@@ -7,16 +7,9 @@
     "test": "jest"
   },
   "dependencies": {
-    "lodash": "^4.17.4",
-    "moment": "^2.18.1",
-    "native-base": "^2.2.0",
+    "@realpub/native-chat": "^1.1.17",
     "react": "16.0.0-alpha.12",
-    "react-native": "0.45.1",
-    "react-native-invertible-scroll-view": "^1.0.0",
-    "react-native-vector-icons": "^4.2.0",
-    "react-router-native": "^4.1.1",
-    "realm": "^1.8.3",
-    "uuid": "^3.1.0"
+    "react-native": "0.45.1"
   },
   "devDependencies": {
     "babel-jest": "20.0.3",
