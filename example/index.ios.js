@@ -93,8 +93,7 @@ export default class ReactNativeChatDemo extends Component {
           apikey="55pq4hiz4rcgf2"
           // hideChatHeader={false}          
           // renderChatHeader={renderHeader}
-          chatBgImg={userBg}
-
+          // chatBgImg={userBg}
           // hideContactsHeader={false}          
           // renderContactsHeader={renderHeader}
           // renderContactsRow={renderContactsRow}
