@@ -7,6 +7,7 @@ import {
   Text,
   FlatList,
   Image,
+  AppState,
   KeyboardAvoidingView
 } from "react-native";
 import uuid from "uuid/v4";
@@ -26,40 +27,53 @@ class ChatScreen extends PureComponent {
       user: null,
       contact: null,
       intervalId: null,
-      messages: []
+      messages: [],
+      appState: AppState.currentState
     };
 
     this.getInitials = this.getInitials.bind(this);
     this.handleInput = this.handleInput.bind(this);
-    this.loadMessages = this.loadMessages.bind(this);
     this.saveAndSendMessage = this.saveAndSendMessage.bind(this);
     this.renderMessageBlock = this.renderMessageBlock.bind(this);
+    this.handleAppStateChange = this.handleAppStateChange.bind(this);
   }
 
   componentDidMount() {
     const { realpub } = this.props;
     const { user, contact, apikey } = this.props.location.state;
-    const messages = realpub.getMessages(user._id, contact._id);
     realpub
       .getMessagesAsync(user._id, contact._id)
       .addListener(() => {
         const messages = realpub.getMessages(user._id, contact._id);
         this.setState({ messages, user, contact });
       });
+
+    const messages = realpub.getMessages(user._id, contact._id);
     this.setState({ messages, user, contact, apikey });
-    ///this.setState({ intervalId: setInterval(this.loadMessages, 1500) });  
+
+    realpub.checkSentMessageStatus(user._id);
+    realpub.resendOfflineMessages(user._id);
+
+    AppState.addEventListener('change', this.handleAppStateChange);
   }
 
   componentWillUnmount() {
     const { realpub } = this.props;
     // Unregister all listeners
     realpub.store.removeAllListeners();
-    //clearInterval(this.state.intervalId);
+    AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
-  loadMessages() {
-    const { user } = this.state;
-    //realpub.loadMessages(user._id);
+  handleAppStateChange = (nextAppState) => {
+    const { realpub, user } = this.props;
+    
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      console.warn('App has come to the foreground!')
+      // App has come to the foreground!
+      realpub.checkSentMessageStatus(user._id);
+      realpub.resendOfflineMessages(user._id);
+    }
+    this.setState({appState: nextAppState});
   }
 
   handleInput(text) {

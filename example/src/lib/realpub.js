@@ -1,21 +1,19 @@
 // To create a client side application
 import store from './store';
 import * as events from './events';
-
+import client from './client';
 //const api = feathers().configure(rest("http://localhost:3030").axios(axios));
-import Realpub from './../realpub-client';
-
 
 
 let conn;
 const connect = async (uID)=> {
-  conn = await Realpub.connect(`http://localhost:8080?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
+  conn = await client.connect(`http://localhost:8080?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
   conn.on('open', function () {
 
     // receive a new message from a friend
     conn.on('data', (msg)=> {
       switch (msg.type) {
-        case 'NEW':
+        case 'SENT':
           events.save(conn, msg.data);
           break;
         case 'RECEIVED': 
@@ -52,6 +50,8 @@ const connect = async (uID)=> {
     //   send an array of message ids to mark as RECEIVED on remote db
     //   cb([]); //confirm action
     // });
+
+    // check sent messge status
     checkSentMessageStatus(uID);
     // resend NEW messages that went offline
     resendOfflineMessages(uID);               
@@ -63,6 +63,7 @@ const checkSentMessageStatus = (uID)=> {
   messages.map(msg => {
   // Save remote NEW message
     conn.send('realpub::message::status', {...msg, connId: conn.id } , (nextMsg, err)=> {
+      //console.warn(nextMsg.status);
       if (!err) {
         if(msg.status !== nextMsg.status) {
           store.write(() => {
@@ -80,7 +81,6 @@ const resendOfflineMessages = (uID)=> {
     messages.map(msg => {
       // Save remote NEW message
       conn.send('realpub::message', {...msg, connId: conn.id } , (nextMsg, err)=> {
-        console.warn(nextMsg)
         if (!err) {
           store.write(() => {
             // Update local with SENT ack from server
@@ -131,6 +131,12 @@ const countMessages = (id)=> {
           .length;
 }
 
+const getReceivedMessages = ()=> {
+  return store
+          .objects("Messages")
+          .filtered(`status = 'RECEIVED'`)
+}
+
 const updateUser = (user)=> {
   store.write(() => {
     store.create("Users", user, true);
@@ -175,6 +181,12 @@ const getMessagesAsync = (userId, contactId)=> {
           );        
 }
 
+const getChanges = ()=> {
+  return store
+    .objects("Messages"); 
+}
+
+
 
 const getContacts = ()=> {
   return store.objects("Contacts");
@@ -199,7 +211,10 @@ const realpub = {
   getContacts,
   markAsRead,
   addListener,
-  removeListener
+  removeListener,
+  resendOfflineMessages,
+  checkSentMessageStatus,
+  getReceivedMessages
 }
 
 const init = (uID)=> {

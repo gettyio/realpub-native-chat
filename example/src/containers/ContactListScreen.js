@@ -1,5 +1,5 @@
 import React, {
-  PureComponent
+  Component
 } from "react";
 import {
   View,
@@ -8,6 +8,7 @@ import {
   Image,
   FlatList,
   StatusBar,
+  AppState,
   TouchableOpacity
 } from "react-native";
 import PropTypes from "prop-types";
@@ -22,53 +23,63 @@ import Header from "./../components/Header";
 import ChatScreen from "./ChatScreen";
 import ContactCard from "./../components/contacts/ContactCard";
 
-class ContactListScreen extends PureComponent {
+class ContactListScreen extends Component {
   constructor(props) {
     super(props);
     
     this.state = {
       isLoading: true,
       isChatReady: false,
-      contacts: [],
-      currentUser: null
+      contacts: props.contacts || [],
+      messagesCount: 0,
+      currentUser: null,
+      appState: AppState.currentState
     };
 
     this.renderRow = this.renderRow.bind(this);
-    this.listenUpdates = this.listenUpdates.bind(this);
     this.handleRenderer = this.handleRenderer.bind(this);
     this.renderContactList = this.renderContactList.bind(this);
     this.renderLoading = this.renderLoading.bind(this);
-    this.showChatHistory = this.showChatHistory.bind(this);
-    this.getTotalUnreadedMessages = this.getTotalUnreadedMessages.bind(this);
+    this.handleAppStateChange = this.handleAppStateChange.bind(this);
     
     const { realpub } = props;
     realpub.updateUser(props.user);
-    realpub.updateContacts(props.contacts);
   }
 
   componentDidMount() {
-    const { user } = this.props;
-    this.listenUpdates();
-
+    const { realpub, user, contacts } = this.props;
     this.setState({
       isLoading: false
     });
+
+    realpub
+      .getReceivedMessages()
+      .addListener(() => {
+        const updatedContacts = contacts.map(item => {
+          const toRead = realpub.countMessages(item._id);
+          return {
+            ...item,
+            toRead
+          }
+        })
+        this.setState({ contacts: updatedContacts });
+      });
+
+    AppState.addEventListener('change', this.handleAppStateChange);
   }
 
-  showChatHistory() {
-    console.warn(2);
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.handleAppStateChange);
   }
 
-  listenUpdates() {
-    const { realpub } = this.props;
-    realpub.store.addListener('change', () => {
-      this.forceUpdate();
-    });
-  }
-
-  getTotalUnreadedMessages(id) {
-    const { realpub } = this.props;
-    return realpub.countMessages(id);
+  handleAppStateChange = (nextAppState) => {
+    const { realpub, user } = this.props;
+    // App has come to the foreground!
+    if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
+      realpub.checkSentMessageStatus(user._id);
+      realpub.resendOfflineMessages(user._id);
+    }
+    this.setState({ appState: nextAppState });
   }
 
   renderRow(row) {
@@ -76,15 +87,13 @@ class ContactListScreen extends PureComponent {
       user,
       apikey
     } = this.props;
-    const total = this.getTotalUnreadedMessages(row.item._id);
 
     return ( 
       <ContactCard key={row.index }
         apikey={apikey}
         user={user}
         contact={row.item}
-        onPress={this.showChatHistory}
-        toRead={total}
+        toRead={row.item.toRead}
       />
     );
   }
@@ -98,8 +107,7 @@ class ContactListScreen extends PureComponent {
   }
 
   renderContactList() {
-    const { realpub } = this.props;
-    const contacts = realpub.getContacts();
+    const { contacts } = this.state;
     return ( 
       <FlatList 
         data = {contacts}
