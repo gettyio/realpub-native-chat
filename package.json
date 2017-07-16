@@ -1,6 +1,6 @@
 {
   "name": "@realpub/native-chat",
-  "version": "1.1.15",
+  "version": "1.1.16",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "react-native-invertible-scroll-view": "^1.0.0",
     "react-native-vector-icons": "^4.2.0",
     "react-router-native": "^4.1.1",
-    "uuid": "^3.1.0",    
+    "uuid": "^3.1.0",
     "prop-types": "^15.5.10",
     "realm": "^1.8.3"
   }
