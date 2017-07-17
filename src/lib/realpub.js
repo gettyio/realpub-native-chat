@@ -7,7 +7,7 @@ import client from './client';
 
 let conn;
 const connect = async (uID)=> {
-  conn = await client.connect(`http://realpub-dev.ad8pxc8stn.us-east-1.elasticbeanstalk.com?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
+  conn = await client.connect(`http://http://34.192.243.18:8080/?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
   conn.on('open', function () {
 
     // receive a new message from a friend
