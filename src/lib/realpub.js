@@ -7,7 +7,7 @@ import client from './client';
 
 let conn;
 const connect = async (uID)=> {
-  conn = await client.connect(`http://34.192.243.18:8080/?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
+  conn = await client.connect(`https://api-v2-1.realpub.io/?token=${uID}`, { strategy: [ 'online', 'timeout', 'disconnect' ]});
   conn.on('open', function () {
 
     // receive a new message from a friend

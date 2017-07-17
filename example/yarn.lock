@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@realpub/native-chat@^1.1.21":
-  version "1.1.21"
-  resolved "https://registry.yarnpkg.com/@realpub/native-chat/-/native-chat-1.1.21.tgz#e3159435f1b16f3eeb4569c372e2496eb877db1b"
+"@realpub/native-chat@^1.1.23":
+  version "1.1.23"
+  resolved "https://registry.yarnpkg.com/@realpub/native-chat/-/native-chat-1.1.23.tgz#c888f9b5c98bfac89a5d1897e4e4a4cb659da0ec"
   dependencies:
     lodash "^4.17.4"
     moment "^2.18.1"
